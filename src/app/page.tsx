@@ -9,7 +9,8 @@ export default function Home() {
         <img
           src="./vetCare_banner (2).webp"
           alt="Veterinary Care"
-          className="w-full h-full mt-8 object-cover object-center"
+        
+          className="w-full h-full  object-cover object-center"
         />
       </section>
 
@@ -33,6 +34,21 @@ export default function Home() {
         </p>
       </div>
  
+             {/* Features */}
+      <section className="max-w-7xl mx-auto py-16 px-6 grid md:grid-cols-3 gap-8 ">
+        <div className="bg-white p-6 shadow border-1 rounded-lg text-center shadow-md hover:shadow-2xl cursor-pointer transition-shadow duration-200">
+          <h3 className="text-xl font-bold mb-2">Pet Health Records</h3>
+          <p>Access and manage detailed medical histories for every patient.</p>
+        </div>
+        <div className="bg-white p-6 shadow rounded-lg border-1 text-center shadow-lg hover:shadow-2xl cursor-pointer transition-shadow duration-200">
+          <h3 className="text-xl font-bold mb-2">Vet Learning Resources</h3>
+          <p>Instant access to research papers, case studies, and vet courses.</p>
+        </div>
+        <div className="bg-white p-6 shadow rounded-lg text-center border-1 shadow-lg hover:shadow-2xl cursor-pointer transition-shadow duration-200">
+          <h3 className="text-xl font-bold mb-2">AI-Driven Diagnosis</h3>
+          <p>Get assistance with possible diagnoses based on symptoms and reports.</p>
+        </div>
+      </section>
   
     </div>
   );
