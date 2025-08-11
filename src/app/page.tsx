@@ -1,4 +1,4 @@
-
+import FAQ from "@/components/Faqs/faqs";
 
 export default function Home() {
   return (
@@ -49,6 +49,13 @@ export default function Home() {
           <p>Get assistance with possible diagnoses based on symptoms and reports.</p>
         </div>
       </section>
+
+      {/* FAQs */}
+       <main className="min-h-screen bg-gray-50">
+      <div className="py-10">
+        <FAQ />
+      </div>
+    </main>
   
     </div>
   );
