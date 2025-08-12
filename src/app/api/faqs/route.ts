@@ -11,7 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
 async function generateFAQs() {
   const prompt = `
     Generate exactly 6 FAQs in JSON format with keys 'question' and 'answer' 
-    about veterinary science for students. 
+    about veterinary science for students and Professionals. 
     Do NOT add markdown formatting or extra text.
   `;
 

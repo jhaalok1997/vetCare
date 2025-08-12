@@ -37,13 +37,13 @@ export default function FAQComponent() {
   return (
     <section className="max-w-3xl mx-auto p-6">
       <h2 className="text-3xl font-bold text-center mb-6">Frequently Asked Questions</h2>
-      <div className="space-y-4">
+      <div className="space-y-4 mt-8 ">
         {faqs.map((faq, idx) => (
           <details
             key={idx}
-            className="p-4 rounded-lg border border-gray-300 shadow-sm bg-white transition hover:shadow-md"
+            className="p-4 w-full rounded-lg border border-gray-300 shadow-md bg-white transition hover:bg-emerald-100"
           >
-            <summary className="font-semibold cursor-pointer">{faq.question}</summary>
+            <summary className="font-semibold cursor-pointer font-serif">{faq.question}</summary>
             <p className="mt-2 text-gray-700">{faq.answer}</p>
           </details>
         ))}
