@@ -1,5 +1,6 @@
 "use client";
 
+import AskVetAI from "../Ask-vet-Assit/vet-assist";
 import {
     Stethoscope,
     BrainCircuit,
@@ -51,7 +52,7 @@ export default function AboutPage() {
             name: "Dr. Meera Sharma",
             role: "Veterinary Surgeon",
             feedback:
-                "VetAI Hub’s predictive analytics helped me anticipate seasonal disease outbreaks. It’s like having an AI-powered colleague by my side.",
+                "Vet🐾Care’s predictive analytics helped me anticipate seasonal disease outbreaks. It’s like having an AI-powered colleague by my side.",
         },
         {
             name: "Akash Jha",
@@ -63,7 +64,7 @@ export default function AboutPage() {
             name: "Neha Gupta",
             role: "Pet Owner",
             feedback:
-                "I used the symptom checker for my Labrador, and the guidance was spot-on. It gave me peace of mind before visiting the vet.",
+                "I used the symptom checker for my Labrador, and the guidance was spot-on. It gave me peace of mind before visiting the vet🐾Care.",
         },
         {
             name: "Prof. R.K. Mishra",
@@ -79,26 +80,26 @@ export default function AboutPage() {
     const controls = useAnimation();
     const [isPaused, setIsPaused] = useState(false);
 
-   const handleHoverStart = async () => {
-  if (!isPaused) {
-    setIsPaused(true);
-    await controls.stop();
-  }
-};
+    const handleHoverStart = async () => {
+        if (!isPaused) {
+            setIsPaused(true);
+            await controls.stop();
+        }
+    };
 
-const handleHoverEnd = async () => {
-  if (isPaused) {
-    setIsPaused(false);
-    controls.start({
-      x: ["0%", "-100%"],
-      transition: {
-        repeat: Infinity,
-        duration: 30,
-        ease: "linear",
-      },
-    });
-  }
-};
+    const handleHoverEnd = async () => {
+        if (isPaused) {
+            setIsPaused(false);
+            controls.start({
+                x: ["0%", "-100%"],
+                transition: {
+                    repeat: Infinity,
+                    duration: 30,
+                    ease: "linear",
+                },
+            });
+        }
+    };
 
 
     return (
@@ -128,6 +129,7 @@ const handleHoverEnd = async () => {
                 </div>
             </section>
 
+
             {/* Call to Action Section */}
             <section className="bg-gradient-to-r from-green-400 to-green-800 text-white py-16 mt-10 rounded-r-full">
                 <div className="max-w-4xl mx-auto text-center px-6">
@@ -139,14 +141,18 @@ const handleHoverEnd = async () => {
                         Ask questions, explore insights, and unlock AI-powered guidance tailored
                         for veterinary professionals, students, and pet owners.
                     </p>
+
                     <a
-                        href="/ask-vet-ai"
-                        className="inline-block bg-white text-green-700 font-semibold px-6 py-3 rounded-xl shadow hover:bg-gray-100 transition"
+                       // href="/ask-vet-ai"
+                        className="inline-block bg-black text-green-700 font-semibold px-4 py-2 rounded-xl shadow hover:bg-gray-100 transition"
                     >
-                        Ask Vet🐾Care Now
+                        <AskVetAI />
+
                     </a>
+
                 </div>
             </section>
+
 
             {/* Scrolling Testimonials Section */}
             <section className="py-20 bg-gray-50 overflow-hidden">
