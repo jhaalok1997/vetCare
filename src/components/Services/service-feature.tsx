@@ -51,14 +51,14 @@ export default function ServicesPage() {
     },
   ];
 
-  const fadeUp = {
-    hidden: { opacity: 0, y: 40 },
-    visible: (i: number) => ({
-      opacity: 1,
-      y: 0,
-      transition: { delay: i * 0.15, duration: 0.6, ease: "easeOut" },
-    }),
-  };
+  // const fadeUp = {
+  //   hidden: { opacity: 0, y: 40 },
+  //   visible: (i: number) => ({
+  //     opacity: 1,
+  //     y: 0,
+  //     transition: { delay: i * 0.15, duration: 0.6, ease: "easeOut" },
+  //   }),
+  // };
 
   return (
     <main className="max-w-6xl mx-auto px-4 py-12">

@@ -13,7 +13,8 @@ async function generateFAQs() {
     Generate exactly 6 FAQs in JSON format with keys 'question' and 'answer' 
     about veterinary science for students and Professionals. 
     Do NOT add markdown formatting or extra text.For Reference:
-     use banaras hindu university veterinary science course Syllabus.
+     use banaras hindu university veterinary science course Syllabus 
+     like cattle , poultry , Bvsc.
   `;
 
   try {

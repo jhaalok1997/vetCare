@@ -109,7 +109,7 @@ export default function AboutPage() {
                 <h2 className="text-3xl font-bold text-center mb-6">
                     About <span className="text-green-600">Vet🐾Care</span>
                 </h2>
-                <p className="text-center text-gray-600 max-w-3xl mx-auto mb-12">
+                <p className="text-center text-gray-800 mask-r-from-neutral-600 max-w-3xl mx-auto mb-12">
                     We combine veterinary science and artificial intelligence to create tools
                     that empower veterinarians, students, and pet owners. Our mission is to
                     bridge the gap between compassionate care and cutting-edge technology.

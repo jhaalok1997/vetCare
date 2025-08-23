@@ -19,7 +19,7 @@ function isVetQuery(query: string): boolean {
 const model = new ChatGroq({
   apiKey: process.env.GROQ_API_KEY || "", // Put key in .env.local
   model: "llama-3.1-8b-instant",
-  temperature: 0.2,
+  temperature: 0.3,
 });
 
 export async function POST(req: Request) {
