@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -9,13 +9,27 @@ import { Menu } from "lucide-react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const [isAuth, setIsAuth] = useState(false);
 
   const navItems = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Services", href: "/services" },
-    { name: "Contact", href: "/contact" },
+    { name: "Contact", href: "/contact" }
   ];
+
+  // ✅ Check auth state
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await fetch("/api/auth/me");
+        setIsAuth(res.ok);
+      } catch {
+        setIsAuth(false);
+      }
+    };
+    checkAuth();
+  }, []);
 
   return (
     <header className="bg-emerald-700 text-white shadow-md sticky top-0 z-50">
@@ -26,7 +40,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop Menu */}
-        <nav className="hidden md:block">
+        <nav className="hidden md:flex items-center gap-4">
           <NavigationMenu>
             <NavigationMenuList>
               {navItems.map((item) => (
@@ -38,6 +52,20 @@ export default function Navbar() {
               ))}
             </NavigationMenuList>
           </NavigationMenu>
+
+          {/* ✅ Auth Buttons */}
+          <div className="ml-6 flex gap-2">
+            {!isAuth && (
+              <Link href="/signup">
+                <Button className="bg-yellow-400 text-black hover:bg-yellow-500">Sign Up</Button>
+              </Link>
+            )}
+            <Link href={isAuth ? "/dashboard" : "/login"}>
+              <Button className="bg-white text-emerald-700 hover:bg-gray-200">
+                {isAuth ? "Dashboard" : "Login"}
+              </Button>
+            </Link>
+          </div>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -60,7 +88,27 @@ export default function Navbar() {
                     {item.name}
                   </Link>
                 ))}
-              </div>
+
+                {/* ✅ Mobile Auth Buttons */}
+                <div className="flex flex-col gap-3 mt-4">
+                  {!isAuth && (
+                    <Link
+                      href="/signup"
+                      className="text-lg bg-yellow-400 text-black px-4 py-2 rounded-md hover:bg-yellow-500 transition text-center"
+                      onClick={() => setOpen(false)}
+                    >
+                      Sign Up
+                    </Link>
+                  )}
+                  <Link
+                    href={isAuth ? "/dashboard" : "/login"}
+                    className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition"
+                    onClick={() => setOpen(false)}
+                  >
+                    {isAuth ? "Dashboard" : "Login"}
+                  </Link>
+                </div>
+                </div>
             </SheetContent>
           </Sheet>
         </div>
