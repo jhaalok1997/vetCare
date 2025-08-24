@@ -4,7 +4,12 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 
-export default function SignupForm() {
+interface SignupFormProps {
+  onSuccess?: () => void;
+}
+
+export default function SignupForm({ onSuccess }: SignupFormProps) {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [message, setMessage] = useState("");
@@ -13,7 +18,7 @@ export default function SignupForm() {
     setMessage("");
 
     // Form validation
-    if (!email || !password) {
+    if (!username || !email || !password) {
       setMessage("❌ Please fill in all fields");
       return;
     }
@@ -32,18 +37,19 @@ export default function SignupForm() {
       const res = await fetch("/api/Auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify({ username, email, password }),
       });
 
       const data = await res.json();
       if (res.ok) {
         setMessage("✅ Signup successful! Please login.");
+        if (onSuccess) onSuccess();
       } else {
-        setMessage(` ${data.error}`);
+        setMessage(`❌ ${data.error}`);
       }
     } catch (error) {
-      setMessage(" An error occurred. Please try again.", );
-      console.log(error)
+      setMessage("❌ An error occurred. Please try again.");
+      console.log(error);
     }
   };
 
@@ -55,6 +61,14 @@ export default function SignupForm() {
       transition={{ duration: 0.5 }}
     >
       <h2 className="text-2xl font-bold mb-6 text-center text-green-600">Create Account</h2>
+
+      <input
+        type="text"
+        placeholder="Username"
+        className="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
+        value={username}
+        onChange={(e) => setUsername(e.target.value)}
+      />
 
       <input
         type="email"

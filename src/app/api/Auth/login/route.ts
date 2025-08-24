@@ -1,24 +1,30 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { connectDB } from "@/lib/mongoDb";
+import User from "@/models/User";
 
-const SECRET = process.env.JWT_SECRET || "supersecret"; // put in .env
-
-const users: { email: string; password: string }[] = []; // same as signup
+const SECRET = process.env.JWT_SECRET || "supersecret";
 
 export async function POST(req: Request) {
-  const { email, password } = await req.json();
-  const user = users.find(u => u.email === email);
+  try {
+    const { email, password } = await req.json();
 
-  if (!user) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    await connectDB();
+    const user = await User.findOne({ email });
+    if (!user) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
-  const match = await bcrypt.compare(password, user.password);
-  if (!match) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
 
-  const token = jwt.sign({ email }, SECRET, { expiresIn: "1h" });
+    const token = jwt.sign({ email }, SECRET, { expiresIn: "1h" });
 
-  const res = NextResponse.json({ message: "Login successful" });
-  res.cookies.set("auth", token, { httpOnly: true, maxAge: 3600, path: "/" });
+    const res = NextResponse.json({ message: "Login successful" });
+    res.cookies.set("auth", token, { httpOnly: true, maxAge: 3600, path: "/" });
 
-  return res;
+    return res;
+  } catch (error) {
+    console.error("Login error:", error);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+  }
 }

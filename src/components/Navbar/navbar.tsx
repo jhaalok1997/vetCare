@@ -11,6 +11,20 @@ export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [isAuth, setIsAuth] = useState(false);
 
+  const handleLogout = async () => {
+    try {
+      const res = await fetch("/api/Auth/logout", {
+        method: "POST",
+      });
+      if (res.ok) {
+        setIsAuth(false);
+        window.location.href = "/"; // Redirect to home page
+      }
+    } catch (error) {
+      console.error("Logout error:", error);
+    }
+  };
+
   const navItems = [
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
@@ -22,7 +36,7 @@ export default function Navbar() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("/api/auth/me");
+        const res = await fetch("/api/Auth/me");
         setIsAuth(res.ok);
       } catch {
         setIsAuth(false);
@@ -41,17 +55,19 @@ export default function Navbar() {
 
         {/* Desktop Menu */}
         <nav className="hidden md:flex items-center gap-4">
-          <NavigationMenu>
-            <NavigationMenuList>
-              {navItems.map((item) => (
-                <NavigationMenuItem key={item.name}>
-                  <Link href={item.href} className="px-4 py-2 hover:bg-emerald-600 rounded-md transition">
-                    {item.name}
-                  </Link>
-                </NavigationMenuItem>
-              ))}
-            </NavigationMenuList>
-          </NavigationMenu>
+          {isAuth && (
+            <NavigationMenu>
+              <NavigationMenuList>
+                {navItems.map((item) => (
+                  <NavigationMenuItem key={item.name}>
+                    <Link href={item.href} className="px-4 py-2 hover:bg-emerald-600 rounded-md transition">
+                      {item.name}
+                    </Link>
+                  </NavigationMenuItem>
+                ))}
+              </NavigationMenuList>
+            </NavigationMenu>
+          )}
 
           {/* ✅ Auth Buttons */}
           <div className="ml-6 flex gap-2">
@@ -65,6 +81,14 @@ export default function Navbar() {
                 {isAuth ? "Dashboard" : "Login"}
               </Button>
             </Link>
+            {isAuth && (
+              <Button 
+                onClick={handleLogout} 
+                className="bg-red-500 text-white hover:bg-red-600"
+              >
+                Logout
+              </Button>
+            )}
           </div>
         </nav>
 
@@ -78,7 +102,7 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="bg-emerald-700 text-white">
               <div className="flex flex-col gap-4 mt-6">
-                {navItems.map((item) => (
+                {isAuth && navItems.map((item) => (
                   <Link
                     key={item.name}
                     href={item.href}
@@ -102,13 +126,24 @@ export default function Navbar() {
                   )}
                   <Link
                     href={isAuth ? "/dashboard" : "/login"}
-                    className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition"
+                    className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
                     onClick={() => setOpen(false)}
                   >
                     {isAuth ? "Dashboard" : "Login"}
                   </Link>
+                  {isAuth && (
+                    <button
+                      onClick={() => {
+                        setOpen(false);
+                        handleLogout();
+                      }}
+                      className="text-lg bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition text-center"
+                    >
+                      Logout
+                    </button>
+                  )}
                 </div>
-                </div>
+              </div>
             </SheetContent>
           </Sheet>
         </div>

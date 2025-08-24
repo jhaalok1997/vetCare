@@ -1,22 +1,30 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
-
-const users: { email: string; password: string }[] = []; // 🛑 Replace with DB in prod
+import { connectDB } from "@/lib/mongoDb";
+import User from "@/models/User";
 
 export async function POST(req: Request) {
-  const { email, password } = await req.json();
+  try {
+    const { username, email, password } = await req.json();
 
-  if (!email || !password) {
-    return NextResponse.json({ error: "Email & password required" }, { status: 400 });
+    if (!username || !email || !password) {
+      return NextResponse.json({ error: "All fields are required" }, { status: 400 });
+    }
+
+    await connectDB();
+
+    // Check duplicates
+    const existingUser = await User.findOne({ $or: [{ email }, { username }] });
+    if (existingUser) {
+      return NextResponse.json({ error: "User already exists" }, { status: 400 });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await User.create({ username, email, password: hashedPassword });
+
+    return NextResponse.json({ message: "Signup successful" }, { status: 201 });
+  } catch (error) {
+    console.error("Signup error:", error);
+    return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }
-
-  // check existing
-  if (users.find(u => u.email === email)) {
-    return NextResponse.json({ error: "User already exists" }, { status: 400 });
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  users.push({ email, password: hashedPassword });
-
-  return NextResponse.json({ message: "Signup successful" }, { status: 201 });
 }

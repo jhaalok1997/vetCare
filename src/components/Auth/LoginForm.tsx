@@ -5,7 +5,11 @@ import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-export default function LoginForm() {
+interface LoginFormProps {
+    onSuccess?: () => void;
+}
+
+export default function LoginForm({ onSuccess }: LoginFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [message, setMessage] = useState("");
@@ -40,6 +44,7 @@ export default function LoginForm() {
             const data = await res.json();
             if (res.ok) {
                 setMessage("✅ Login successful!");
+                onSuccess?.();
                 setTimeout(() => router.push("/dashboard"), 1000); // redirect
             } else {
                 setMessage(` ${data.error}`);
