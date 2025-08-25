@@ -82,8 +82,8 @@ export default function Navbar() {
               </Button>
             </Link>
             {isAuth && (
-              <Button 
-                onClick={handleLogout} 
+              <Button
+                onClick={handleLogout}
                 className="bg-red-500 text-white hover:bg-red-600"
               >
                 Logout

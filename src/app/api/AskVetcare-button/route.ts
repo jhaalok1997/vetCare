@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       {
         role: "system",
         content:
-          "Hey, I am your Vet Assistant .I am expert in veterinary science Domain Only .",
+          "Hey, I am your Vet Assistant .I am expert in veterinary science Domain Only . Please don't use special characters in the response . Use plain English but in structured way.",
       },
       { role: "user", content: question },
     ]);
