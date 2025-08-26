@@ -67,7 +67,7 @@ export default function AskVetAI() {
 
                         {answer && (
                             <div className="mt-4 p-3 border rounded-md bg-gray-50 overflow-y-auto max-h-[40vh]">
-                                <p className="font-semibold text-blue-700">Vet-Assistant:</p>
+                                <p className="font-semibold text-blue-700">Output:</p>
                                 <p className="text-sm">{answer}</p>
                             </div>
                         )}

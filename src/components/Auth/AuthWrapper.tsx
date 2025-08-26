@@ -30,7 +30,9 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     }, []);
 
     if (loading) {
-        return <div className="min-h-screen flex items-center justify-center"><Atom color="#32cd32" size="large" text="Loading" textColor="#af5151" /></div>;
+        return <div className="min-h-screen flex items-center justify-center">   
+            <Atom color="#32cd32" size="large" text="Loading" textColor="#af5151" />   
+        </div>;
     }
 
     if (!isAuth) {
