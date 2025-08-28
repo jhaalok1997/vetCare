@@ -39,10 +39,9 @@ export default function AskVetAI() {
                     <Button className="text-green-700">Ask Vet🐾Care Assistant</Button>
                 </DrawerTrigger>
 
-                {/* ✅ Drawer from left side, height = 50% of screen, scrollable */}
                 <DrawerContent
-                   // side="right"
-                    className="h-[60vh] w-full sm:max-w-md flex flex-col bg-green-200 overflow-y-auto"
+                    
+                 className="h-[80vh] w-full sm:max-w-md flex flex-col bg-green-200 overflow-y-auto"
                 >
                     <DrawerHeader>
                         <DrawerTitle>Ask Vet🐾Care</DrawerTitle>
@@ -50,7 +49,7 @@ export default function AskVetAI() {
 
                     <div className="p-4 flex flex-col gap-4 flex-grow overflow-y-auto">
                         <textarea
-                            className="w-full p-3 border rounded-md"
+                            className="w-full p-2 border rounded-md"
                             rows={3}
                             placeholder="Ask about veterinary problems..."
                             value={question}
@@ -60,7 +59,7 @@ export default function AskVetAI() {
                         <Button
                             onClick={handleAsk}
                             disabled={loading}
-                            className="bg-black text-white hover:bg-gray-500 transition"
+                            className="bg-black mx-12 text-white hover:bg-gray-500 cursor-pointer transition"
                         >
                             {loading ? "Thinking..." : "Ask"}
                         </Button>

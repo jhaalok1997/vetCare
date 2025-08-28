@@ -28,7 +28,7 @@ const vetKeywords = [
   "anatomy", "pathology", "parasitology", "pharmacology", "parasitology","swine",
   "toxicology", "surgery", "diagnosis", "vaccination", "epidemiology","bird flu",
   "animal breeding", "nutrition", "theriogenology", "public health","antrox",
-  "research", "thesis", "dissertation", "case study", "animal welfare"
+  "research", "thesis", "dissertation", "case study", "animal welfare",
 ];
 
 function isVetQuery(query: string): boolean {
@@ -90,10 +90,7 @@ async function searchTavily(query: string): Promise<TavilySearchResponse> {
 // --- Format LLM text into bullet points (basic heuristic)
 function formatToBullets(text: string): string {
   // Split by sentence or line breaks
-  const parts = text
-    .split(/[\n.]/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
+  const parts = text.split(/[\n.]/).map((s) => s.trim()).filter((s) => s.length > 0);
 
   if (parts.length === 0) return text;
 
