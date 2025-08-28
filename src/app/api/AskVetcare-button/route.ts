@@ -147,7 +147,7 @@ export async function POST(req: Request) {
             .join("\n\n");
 
           return NextResponse.json({
-            answer: `🩺 VetCare Assistant Response\n\n**Question:** ${question}\n\n**Answer:**\n${topResults}\n\n(Sources: Latest information via Tavily API, ${currentYear})`
+            answer: `${topResults}\n\n(Sources: Latest information via Tavily API, ${currentYear})`
           });
         }
       } catch (err) {
