@@ -118,7 +118,7 @@ export async function POST(req: Request) {
     history.push(userMessage);
 
     // Clean old messages if history is too long (keep last 10 messages)
-    while (history.length > 10) {
+    while (history.length > 15) {
       history.shift();
     }
 
@@ -186,7 +186,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ answer: `🩺 ${formattedAnswer}`, history });
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-      console.error("❌ Groq model error:", errorMessage);
+      console.error(" Groq model error:", errorMessage);
       
       // Add error to history so we know where conversation broke
       history.push({ 

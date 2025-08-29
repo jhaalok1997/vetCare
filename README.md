@@ -1,51 +1,70 @@
 # 🐾 VetCare Assistant
 
-A modern web application built with Next.js that provides veterinary care assistance and pet healthcare services.
+An advanced AI-powered veterinary consultation platform built with Next.js, providing real-time veterinary information and assistance.
 
-## 🌟 Features
+[![Next.js](https://img.shields.io/badge/Next.js-14-black)](https://nextjs.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)](https://www.typescriptlang.org/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)](https://www.mongodb.com/atlas)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-### Authentication & User Management
-- Secure user signup and login system
-- JWT-based authentication
-- Protected routes for authenticated users
-- User profile management
-- Secure logout functionality
+## 📚 Table of Contents
 
-### Core Features
-- **Veterinary Consultation**: Direct access to veterinary expertise
-- **Pet Health Information**: Comprehensive resources about pet care
-- **Service Directory**: List of available veterinary services
-- **Contact Support**: Easy way to reach out for assistance
+- [Features](#-features)
+- [Tech Stack](#-tech-stack)
+- [Getting Started](#-getting-started)
+- [Architecture](#-architecture)
+- [API Integration](#-api-integration)
+- [Environment Setup](#-environment-setup)
+- [Contributing](#-contributing)
+- [License](#-license)
 
-### User Interface
-- Modern, responsive design
-- Mobile-friendly navigation
-- Interactive components using shadcn/ui
-- Smooth animations with Framer Motion
+## ✨ Features
+
+### 🤖 AI-Powered Assistance
+- **Real-time Veterinary Information**: Integrated with Groq and Tavily for up-to-date veterinary knowledge
+- **Smart Query Processing**: Automatically detects and handles current (2025) information requests
+- **Conversation History**: Maintains context-aware chat history per user
+- **Domain-Specific Responses**: Focused on veterinary and animal health topics
+
+### 🔐 Authentication & Security
+- Secure JWT-based authentication
+- Protected API routes
+- MongoDB session management
+- Password hashing with bcrypt
+
+### 💻 User Interface
+- Responsive, modern design
 - Dark mode support
+- Interactive components using shadcn/ui
+- Real-time chat interface
 
-## 🛠️ Technical Stack
+## 🛠 Tech Stack
 
-- **Frontend**:
-  - Next.js 14 (App Router)
-  - React
-  - TypeScript
-  - Tailwind CSS
-  - Framer Motion
-  - shadcn/ui components
+### Frontend
+- **Framework**: Next.js 14 (App Router)
+- **Language**: TypeScript
+- **Styling**: Tailwind CSS
+- **Components**: shadcn/ui
+- **State Management**: React Context
 
-- **Backend**:
-  - Next.js API Routes
-  - MongoDB (Database)
-  - JWT (Authentication)
-  - bcrypt (Password Hashing)
+### Backend
+- **Runtime**: Next.js API Routes
+- **Database**: MongoDB Atlas
+- **Caching**: Node-Cache
+- **Authentication**: JWT
 
-## 💻 Getting Started
+### AI & Search
+- **LLM**: Groq (llama-3.1-8b-instant)
+- **Web Search**: Tavily API
+- **Response Format**: Markdown with bullet points
+
+## � Getting Started
 
 ### Prerequisites
 - Node.js 18.0 or later
 - MongoDB Atlas account
-- npm or yarn package manager
+- Groq API key
+- Tavily API key
 
 ### Installation
 
@@ -58,13 +77,17 @@ cd vetCare
 2. Install dependencies:
 ```bash
 npm install
+# or
+yarn install
 ```
 
 3. Set up environment variables:
-Create a `.env` file in the root directory with the following:
 ```env
 MONGODB_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
+GROQ_API_KEY=your_groq_api_key
+TAVILY_API_KEY=your_tavily_api_key
+ENABLE_TAVILY=true
 ```
 
 4. Run the development server:
@@ -72,31 +95,78 @@ JWT_SECRET=your_jwt_secret
 npm run dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+## 🏗 Architecture
 
-## 🔒 Environment Variables
+### API Routes
+- **/api/Auth/***: Authentication endpoints
+- **/api/AskVetcare-button**: AI assistant endpoint
+- **/api/ContactedUser**: User management
+
+### Database Schema
+- **Users**: Authentication and profile data
+- **ContactedUsers**: User interaction records
+
+### AI Processing Flow
+1. Query validation and domain restriction
+2. Current information detection
+3. Tavily integration for recent data
+4. Groq LLM for general knowledge
+5. Response formatting and history management
+
+## � API Integration
+
+### Tavily Integration
+```typescript
+const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY });
+
+// Specialized veterinary domain search
+const searchOptions = {
+  search_depth: "advanced",
+  include_domains: [
+    "avma.org",
+    "vin.com",
+    "merckvetmanual.com",
+    // ... more domains
+  ]
+};
+```
+
+### Groq Integration
+```typescript
+const model = new ChatGroq({
+  apiKey: process.env.GROQ_API_KEY,
+  model: "llama-3.1-8b-instant",
+  temperature: 0.3
+});
+```
+
+## 🔧 Environment Setup
 
 Required environment variables:
 
-- `MONGODB_URI`: Your MongoDB connection string
-- `JWT_SECRET`: Secret key for JWT token generation
-- `OPENAI_API_KEY`: (Optional) For AI-powered features
+| Variable | Description | Required |
+|----------|-------------|----------|
+| MONGODB_URI | MongoDB connection string | Yes |
+| JWT_SECRET | Secret for JWT tokens | Yes |
+| GROQ_API_KEY | Groq API key | Yes |
+| TAVILY_API_KEY | Tavily API key | Yes |
+| ENABLE_TAVILY | Enable Tavily integration | Yes |
 
-## 📱 Features Overview
+## 👥 Contributing
 
-### Public Pages
-- **Home**: Introduction to VetCare services
-- **About**: Information about our mission and team
-- **Services**: List of available veterinary services
-- **Contact**: Get in touch with our team
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push to the branch
+5. Open a Pull Request
 
-### Protected Features
-- **Dashboard**: Personalized user dashboard
-- **Pet Profiles**: Manage pet information
-- **Consultation History**: Track veterinary consultations
-- **Health Records**: Store and manage pet health records
+## 📄 License
 
-## 🎨 UI Components
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+Built with ❤️ by [Alok Kumar Jha](https://github.com/jhaalok1997)
 
 The application uses shadcn/ui components for a consistent and modern look:
 - Custom Button components
