@@ -21,6 +21,14 @@ const UserSchema = new Schema(
       required: [true, "Password is required"],
       minlength: [5, "Password must be at least 5 characters long"],
     },
+    resetToken: {
+      type: String,
+      default: null,
+    },
+    resetTokenExpiry: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true }
 );
