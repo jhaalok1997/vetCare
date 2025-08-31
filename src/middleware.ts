@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const SECRET = process.env.JWT_SECRET || "supersecret";
 
 export function middleware(req: NextRequest) {
-  const token = req.cookies.get("auth")?.value;
+  const token = req.cookies.get("auth")?.value || req.headers.get("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
