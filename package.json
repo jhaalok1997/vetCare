@@ -27,6 +27,7 @@
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.23.12",
     "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "langchain": "^0.3.31",
     "lucide-react": "^0.539.0",
     "mongodb": "^6.18.0",

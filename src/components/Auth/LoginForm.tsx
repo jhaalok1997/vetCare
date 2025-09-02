@@ -4,9 +4,19 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+// lightweight JWT decoder (no verify, just parse payload)
+import { jwtDecode } from "jwt-decode";
 
 interface LoginFormProps {
-    onSuccess?: () => void;
+    onSuccess?: (user: object) => void;
+}
+
+interface DecodedToken {
+    id: string;
+    email: string;
+    role: string;
+    tenantId?: string;
+    exp: number;
 }
 
 export default function LoginForm({ onSuccess }: LoginFormProps) {
@@ -19,20 +29,11 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
     const handleLogin = async () => {
         setMessage("");
+        setIsLoading(true);
 
-        // Form validation
         if (!email || !password) {
-            setMessage(" Please fill in all fields");
-            return;
-        }
-
-        if (!email.includes('@') || !email.includes('.')) {
-            setMessage(" Please enter a valid email address");
-            return;
-        }
-
-        if (password.length < 5) {
-            setMessage(" Password must be at least 6 characters long");
+            setMessage("❌ Please fill in all fields");
+            setIsLoading(false);
             return;
         }
 
@@ -46,15 +47,36 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             const data = await res.json();
             if (res.ok) {
                 setMessage("✅ Login successful!");
-                onSuccess?.();
-                setTimeout(() => router.push("/dashboard"), 1000); // redirect
+
+                // 🔑 The token is set in an HttpOnly cookie by backend,
+                // but for redirect logic we can also return it in the response (optional).
+                if (data.token) {
+                    const decoded: DecodedToken = jwtDecode(data.token);
+
+                    // Call parent callback
+                    onSuccess?.(decoded);
+
+                    // Role-based redirects
+                    if (decoded.role === "admin") {
+                        router.push("/admin/dashboard");
+                    } else if (decoded.role === "vet") {
+                        router.push("/vet/dashboard");
+                    } else {
+                        router.push("/dashboard");
+                    }
+                } else {
+                    // Fallback: default redirect
+                    router.push("/dashboard");
+                }
             } else {
-                setMessage(` ${data.error}`);
+                setMessage(`❌ ${data.error}`);
             }
         } catch (error) {
-            setMessage(" An error occurred. Please try again.");
-            console.log(error)
+            setMessage("❌ An error occurred. Please try again.");
+            console.error(error);
         }
+
+        setIsLoading(false);
     };
 
     const handleForgotPassword = async () => {
@@ -62,7 +84,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         setMessage("");
 
         if (!email) {
-            setMessage("Please enter your email address");
+            setMessage("❌ Please enter your email address");
             setIsLoading(false);
             return;
         }

@@ -39,7 +39,7 @@ export async function GET(req: Request) {
     // ✅ Return username + email
     return NextResponse.json({ user: { username: user.username, email: user.email } });
   } catch (error) {
-    console.error("❌ /auth/me error:", error);
+    console.error("❌ /auth/profile error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

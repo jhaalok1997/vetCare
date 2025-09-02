@@ -18,7 +18,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const res = await fetch("/api/Auth/me");
+                const res = await fetch("/api/Auth/profile");
                 setIsAuth(res.ok);
             } catch {
                 setIsAuth(false);
@@ -30,8 +30,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     }, []);
 
     if (loading) {
-        return <div className="min-h-screen flex items-center justify-center">   
-            <Atom color="#32cd32" size="large" text="Loading" textColor="#af5151" />   
+        return <div className="min-h-screen flex items-center justify-center">
+            <Atom color="#32cd32" size="large" text="Loading" textColor="#af5151" />
         </div>;
     }
 

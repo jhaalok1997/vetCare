@@ -36,7 +36,7 @@ export default function Navbar() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("/api/Auth/me");
+        const res = await fetch("/api/Auth/profile");
         setIsAuth(res.ok);
       } catch {
         setIsAuth(false);

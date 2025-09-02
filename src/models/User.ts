@@ -1,4 +1,4 @@
-import  { Schema, models, model } from "mongoose";
+import { Schema, models, model } from "mongoose";
 
 const UserSchema = new Schema(
   {
@@ -21,6 +21,15 @@ const UserSchema = new Schema(
       required: [true, "Password is required"],
       minlength: [5, "Password must be at least 5 characters long"],
     },
+    role: {
+      type: String,
+      enum: ["petOwner", "vet", "admin"], // ✅ allowed roles
+      default: "petOwner",                // ✅ default role
+    },
+    tenantId: {
+      type: String, // or mongoose.Schema.Types.ObjectId if you have an Org model
+      required: true, // 👈 ensures every user belongs to a tenant
+    },
     resetToken: {
       type: String,
       default: null,
@@ -33,7 +42,5 @@ const UserSchema = new Schema(
   { timestamps: true }
 );
 
-// Prevent recompiling model during hot reloads in Next.js
 const User = models.User || model("User", UserSchema);
-
 export default User;
