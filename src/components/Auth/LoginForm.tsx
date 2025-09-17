@@ -4,8 +4,7 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-// lightweight JWT decoder (no verify, just parse payload)
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";  // lightweight JWT decoder (no verify, just parse payload)
 
 interface LoginFormProps {
     onSuccess?: (user: object) => void;
