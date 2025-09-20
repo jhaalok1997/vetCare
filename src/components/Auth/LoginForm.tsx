@@ -61,11 +61,14 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                     } else if (decoded.role === "vet") {
                         router.push("/vet/dashboard");
                     } else {
-                        router.push("/dashboard");
+                        router.replace("/");
+
                     }
+                    router.refresh();
                 } else {
                     // Fallback: default redirect
-                    router.push("/dashboard");
+                    router.replace("/");
+                    router.refresh();
                 }
             } else {
                 setMessage(`❌ ${data.error}`);

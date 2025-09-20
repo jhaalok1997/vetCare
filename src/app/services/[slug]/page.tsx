@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { services } from "../serviceData";
+import { services } from "../../../components/Services/Service-main/serviceData";
 import { motion } from "framer-motion";
 import Link from "next/link";
 
@@ -22,12 +22,7 @@ export default function ServiceDetailPage() {
 
     return (
         <main className="max-w-6xl mx-auto px-6 py-12">
-            {/* ✅ Breadcrumbs */}
-            <nav className="text-sm text-gray-600 mb-6">
-                <Link href="/" className="hover:underline">Home</Link> /
-                <Link href="/services" className="hover:underline"> Services</Link> /
-                <span className="text-emerald-600 font-medium">{service.title}</span>
-            </nav>
+
 
             {/* ✅ Hero Section */}
             <motion.section

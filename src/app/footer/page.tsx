@@ -1,26 +1,53 @@
+import Link from "next/link";
+import { Niconne } from "next/font/google";
+
+
+export const niconne = Niconne({
+  variable: "--font-niconne",
+  subsets: ["latin"],
+  weight: ["400"],
+});
+
 export default function Footer() {
   return (
     <footer className="bg-green-900 text-white mt-12">
       <div className="container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
-        
+
         {/* About */}
-        <div>
-          <h3 className="text-xl font-bold mb-4">About Vet🐾Care</h3>
-          <p className="text-sm">
+        <div className={` ${niconne.className}`}>
+          <h3 className="text-3xl font-bold mb-4">About Vet🐾Care</h3>
+          <p className="text-xl">
             VetCare is dedicated to providing reliable, fast, and insightful veterinary resources to students, professionals, and researchers.
           </p>
         </div>
 
         {/* Quick Links */}
-        <div>
-          <h3 className="text-xl font-bold mb-4">Quick Links</h3>
-          <ul className="space-y-2 text-sm">
-            <li><a href="/" className="hover:text-yellow-300">Home</a></li>
-            <li><a href="/about" className="hover:text-yellow-300">About</a></li>
-            <li><a href="/services" className="hover:text-yellow-300">Services</a></li>
-            <li><a href="/contact" className="hover:text-yellow-300">Contact</a></li>
-          </ul>
+        <div className="flex flex-col md:flex-row gap-28">
+          <div>
+            <h3 className="text-xl font-bold mb-4">Quick Links</h3>
+            <ul className="space-y-2 text-sm flex flex-col">
+              <li><Link href="/" className="hover:text-yellow-300">Home</Link></li>
+              <li><Link href="/about" className="hover:text-yellow-300">About</Link></li>
+              <li><Link href="/services" className="hover:text-yellow-300">Services</Link></li>
+              <li><Link href="/contact" className="hover:text-yellow-300">Contact</Link></li>
+            </ul>
+          </div>
+
+           {/* Services */}
+
+          <div>
+            <h3 className="text-xl font-bold mb-4">Services</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Link href="/services/general-veterinary-care" className="hover:text-yellow-300">General Veterinary Care</Link></li>
+              <li><Link href="/services/emergency-critical-care" className="hover:text-yellow-300">Emergency & Critical Care</Link></li>
+              <li><Link href="/services/vaccination-immunization" className="hover:text-yellow-300">Vaccination & Immunization</Link></li>
+              <li><Link href="/services/animal-health-tracking" className="hover:text-yellow-300">Animal Health Tracking</Link></li>
+              <li><Link href="/services/diagnostics-lab-services" className="hover:text-yellow-300">Diagnostics & Lab Services</Link></li>
+              <li><Link href="/services/nutrition-rehabilitation" className="hover:text-yellow-300">Nutrition & Rehabilitation</Link></li>
+            </ul>
+          </div>
         </div>
+
 
         {/* Contact */}
         <div>
@@ -32,7 +59,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="bg-green-950 text-center py-3 text-sm">
+      <div className="bg-green-950 text-center py-3 text-md">
         © {new Date().getFullYear()} Vet🐾Care. All rights reserved.
       </div>
     </footer>
