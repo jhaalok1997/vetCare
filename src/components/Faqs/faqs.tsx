@@ -35,16 +35,16 @@ export default function FAQComponent() {
   if (loading) return <p className="text-center">Loading FAQs...</p>;
 
   return (
-    <section className="max-w-3xl mx-auto p-6">
-      <h2 className="text-3xl font-bold text-center mb-6">Frequently Asked Questions</h2>
-      <div className="space-y-4 mt-8 ">
+    <section className="max-w-3xl mx-auto p-4 sm:p-6">
+      <h2 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6">Frequently Asked Questions</h2>
+      <div className="space-y-3 sm:space-y-4 mt-6 sm:mt-8">
         {faqs.map((faq, idx) => (
           <details
             key={idx}
-            className="p-4 w-full rounded-lg border border-gray-300 shadow-md bg-white transition hover:bg-emerald-100"
+            className="p-3 sm:p-4 w-full rounded-lg border border-gray-300 shadow-md bg-white transition hover:bg-emerald-100"
           >
-            <summary className="font-semibold cursor-pointer font-serif">{faq.question}</summary>
-            <p className="mt-2 text-gray-700">{faq.answer}</p>
+            <summary className="font-semibold cursor-pointer font-serif text-sm sm:text-base">{faq.question}</summary>
+            <p className="mt-2 text-gray-700 text-sm sm:text-base leading-relaxed">{faq.answer}</p>
           </details>
         ))}
       </div>

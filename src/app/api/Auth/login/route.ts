@@ -35,6 +35,7 @@ export async function POST(req: Request) {
 
     const res = NextResponse.json({
       message: "Login successful",
+      token: token, // Include token in response for client-side handling
       user: {
         id: user._id,
         email: user.email,
