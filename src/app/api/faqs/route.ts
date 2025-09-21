@@ -41,7 +41,7 @@ async function generateFAQs() {
   }
 }
 
-let cachedFAQs: [] = [];
+let cachedFAQs: Array<{ question: string; answer: string }> = [];
 let lastGenerated = 0;
 
 export async function GET() {
@@ -55,7 +55,7 @@ export async function GET() {
     }
 
     return NextResponse.json(cachedFAQs);
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("❌ API error:", error);
     return NextResponse.json(
       [{ question: "Service temporarily unavailable", answer: "Please try again later." }],

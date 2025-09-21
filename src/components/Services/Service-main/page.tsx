@@ -4,8 +4,11 @@ import { services } from "./serviceData";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import UserDetailForm from "./userDetailForm";
+
 
 export default function ServicesPage() {
+   
     return (
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
             {/* Header Section */}
@@ -20,6 +23,13 @@ export default function ServicesPage() {
                     We provide a wide range of services to ensure your animals receive the best care possible.
                 </p>
             </motion.section>
+
+
+            {/*  Here User Detail Form is Presented*/}
+
+            <UserDetailForm />
+
+
 
             {/* Services Grid */}
             <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">

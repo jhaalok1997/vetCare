@@ -54,10 +54,11 @@ export async function POST(req: Request) {
     });
 
     return res;
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Login error:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

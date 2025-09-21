@@ -48,8 +48,9 @@ export async function GET(req: Request) {
         tenantId: user.tenantId
       } 
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("❌ /auth/profile error:", error);
-    return NextResponse.json({ error: "Server error" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : 'Server error';
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }
