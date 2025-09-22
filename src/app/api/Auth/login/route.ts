@@ -22,15 +22,18 @@ export async function POST(req: Request) {
     }
 
     // ✅ Payload includes tenantId & role
+    // Admin gets longer session duration
+    const tokenExpiry = user.role === "admin" ? "24h" : "1h";
+    
     const token = jwt.sign(
       {
         id: user._id,
         email: user.email,
-        role: user.role || "owner",
+        role: user.role || "petOwner",
         tenantId: user.tenantId, // 👈 crucial for tenant isolation
       },
       SECRET,
-      { expiresIn: "1h" }
+      { expiresIn: tokenExpiry }
     );
 
     const res = NextResponse.json({
@@ -44,12 +47,14 @@ export async function POST(req: Request) {
       },
     });
 
-    // ✅ Strong cookie settings
+    // ✅ Strong cookie settings with longer duration for admin
+    const cookieMaxAge = user.role === "admin" ? 24 * 60 * 60 : 60 * 60; // 24h for admin, 1h for others
+    
     res.cookies.set("auth", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production", // use HTTPS in prod
       sameSite: "lax",
-      maxAge: 60 * 60, // 1 hour
+      maxAge: cookieMaxAge,
       path: "/",
     });
 
