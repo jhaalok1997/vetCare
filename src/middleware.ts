@@ -21,6 +21,10 @@ export function middleware(req: NextRequest) {
   try {
     // ✅ Decode token
     const decoded = jwt.verify(token, SECRET) as DecodedToken;
+    
+    // ✅ Add user info into headers for downstream usage
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-user", JSON.stringify(decoded));
 
     // RBAC rules
     const pathname = req.nextUrl.pathname;
@@ -28,8 +32,15 @@ export function middleware(req: NextRequest) {
     // ✅ Admin routes
     if (pathname.startsWith("/admin")) {
       if (decoded.role !== "admin") {
-        return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
+        // Redirect non-admin users to home page instead of showing error
+        return NextResponse.redirect(new URL("/", req.url));
       }
+      // Allow admin users to proceed to admin routes
+      return NextResponse.next({
+        request: {
+          headers: requestHeaders
+        }
+      });
     }
 
     // ✅ Tenant isolation (example: /tenant/[tenantId]/...)
@@ -40,11 +51,11 @@ export function middleware(req: NextRequest) {
       }
     }
 
-    // ✅ Add user info into headers for downstream usage
-    const requestHeaders = new Headers(req.headers);
-    requestHeaders.set("x-user", JSON.stringify(decoded));
-
-    return NextResponse.next({ request: { headers: requestHeaders } });
+    return NextResponse.next({
+      request: { 
+        headers: requestHeaders 
+      }
+    });
   } catch (err) {
     console.error("JWT verification failed:", err);
     return NextResponse.redirect(new URL("/login", req.url));

@@ -1,9 +1,6 @@
 import AboutPage from "@/components/Aboutus/aboutuspage";
 
 
-
-
-
 export default function About() {
   return (
     <main className="min-h-screen p-4 sm:p-6 lg:p-10 bg-emerald-50">

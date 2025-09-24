@@ -11,24 +11,27 @@ interface AdminAuthWrapperProps {
 export default function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
   const router = useRouter();
 
   useEffect(() => {
     const checkAdminAuth = async () => {
       try {
-        const res = await fetch("/api/Auth/profile");
-        if (res.ok) {
-          const userData = await res.json();
-          if (userData.role === "admin") {
+        const res = await fetch("/api/Auth/profile", {
+          credentials: 'include' // Important: Include credentials for cookie
+        });
+        const userData = await res.json();
+
+        if (res.ok && userData.user) {
+          if (userData.user.role === "admin") {
             setIsAdmin(true);
-            setUser(userData);
+            setLoading(false);
+            return; // Don't redirect if admin
+          } else if (userData.user.role === "vet") {
+            router.push("/vet/dashboard");
           } else {
-            // Redirect non-admin users to home
             router.push("/");
           }
         } else {
-          // Redirect unauthenticated users to login
           router.push("/login");
         }
       } catch (error) {
@@ -55,7 +58,7 @@ export default function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-4">You don't have admin privileges.</p>
+          <p className="text-gray-600 mb-4">You do not have admin privileges.</p>
           <button
             onClick={() => router.push("/")}
             className="bg-emerald-600 text-white px-4 py-2 rounded-md hover:bg-emerald-700"

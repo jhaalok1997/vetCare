@@ -10,7 +10,6 @@ import {
     CogIcon,
     DocumentTextIcon,
     ShieldCheckIcon,
-    Bars3Icon,
     XMarkIcon
 } from "@heroicons/react/24/outline";
 
@@ -51,8 +50,8 @@ export default function AdminSidebar() {
                                     key={item.name}
                                     href={item.href}
                                     className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${isActive
-                                            ? 'bg-emerald-100 text-emerald-900'
-                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        ? 'bg-emerald-100 text-emerald-900'
+                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
                                 >
                                     <item.icon
@@ -81,8 +80,8 @@ export default function AdminSidebar() {
                                     key={item.name}
                                     href={item.href}
                                     className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors ${isActive
-                                            ? 'bg-emerald-100 text-emerald-900'
-                                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                                        ? 'bg-emerald-100 text-emerald-900'
+                                        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
                                 >
                                     <item.icon

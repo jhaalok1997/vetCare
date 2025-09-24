@@ -29,12 +29,17 @@ export default function Navbar() {
     }
   };
 
-  const navItems = [
+  interface NavItem {
+    name: string;
+    href: string;
+  }
+
+  const [navItems, setNavItems] = useState<NavItem[]>([
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Services", href: "/services" },
     { name: "Contact", href: "/contact" }
-  ];
+  ]);
 
   // ✅ Check auth state and get user role
   useEffect(() => {
@@ -46,6 +51,20 @@ export default function Navbar() {
           setIsAuth(true);
           setUserRole(data.user?.role || null);
           setUsername(data.user?.username || null);
+
+          // Update navigation items based on user role
+          const baseItems = [
+            { name: "Home", href: "/" },
+            { name: "About", href: "/about" },
+            { name: "Services", href: "/services" },
+            { name: "Contact", href: "/contact" }
+          ];
+
+          if (data.user?.role === "vet") {
+            baseItems.push({ name: "Dashboard", href: "/dashboard" });
+          }
+
+          setNavItems(baseItems);
         } else {
           setIsAuth(false);
           setUserRole(null);
@@ -91,10 +110,17 @@ export default function Navbar() {
                 <Button className="bg-yellow-400 text-black hover:bg-yellow-500">Sign Up</Button>
               </Link>
             )}
-            {isAuth && (userRole === "admin" || userRole === "vet") && (
-              <Link href="/dashboard">
+            {isAuth && userRole === "admin" && (
+              <Link href="/admin">
                 <Button className="bg-white text-emerald-700 hover:bg-gray-200">
-                  Dashboard
+                  Admin Dashboard
+                </Button>
+              </Link>
+            )}
+            {isAuth && userRole === "vet" && (
+              <Link href="/vet/vet-dashboard">
+                <Button className="bg-white text-emerald-700 hover:bg-gray-200">
+                  Vet Dashboard
                 </Button>
               </Link>
             )}
@@ -153,13 +179,22 @@ export default function Navbar() {
                       Sign Up
                     </Link>
                   )}
-                  {isAuth && (userRole === "admin" || userRole === "vet") && (
+                  {isAuth && userRole === "admin" && (
                     <Link
-                      href="/dashboard"
+                      href="/admin"
                       className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
                       onClick={() => setOpen(false)}
                     >
-                      Dashboard
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  {isAuth && userRole === "vet" && (
+                    <Link
+                      href="/veterniarian/Dashboard"
+                      className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
+                      onClick={() => setOpen(false)}
+                    >
+                      Vet Dashboard
                     </Link>
                   )}
                   {isAuth && userRole === "petOwner" && username && (

@@ -4,8 +4,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Bars3Icon, BellIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 
+interface User {
+    id: string;
+    username: string;
+    email: string;
+    role: 'admin' | 'vet' | 'petOwner';
+    tenantId?: string;
+}
+
 interface AdminHeaderProps {
-    user: any;
+    user: User | null;
 }
 
 export default function AdminHeader({ user }: AdminHeaderProps) {
@@ -38,7 +46,7 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
                     </button>
                     <div className="ml-4 lg:ml-0">
                         <h2 className="text-lg font-semibold text-gray-900">
-                            Welcome back, {user?.username || "Admin"}
+                            Welcome back, {user ? user.username : "Admin"}
                         </h2>
                         <p className="text-sm text-gray-500">Admin Dashboard</p>
                     </div>
@@ -59,7 +67,9 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
                             onClick={() => setIsOpen(!isOpen)}
                         >
                             <UserCircleIcon className="h-8 w-8" />
-                            <span className="text-sm font-medium text-gray-700">{user?.username}</span>
+                            <span className="text-sm font-medium text-gray-700">
+                                {user ? user.username : "Admin"}
+                            </span>
                         </button>
 
                         {isOpen && (
@@ -67,7 +77,9 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
                                 <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
                                     <p className="font-medium">{user?.username}</p>
                                     <p className="text-gray-500">{user?.email}</p>
-                                    <p className="text-xs text-emerald-600 font-medium">{user?.role?.toUpperCase()}</p>
+                                    <p className="text-xs text-emerald-600 font-medium">
+                                        {user?.role ? user.role.toUpperCase() : ''}
+                                    </p>
                                 </div>
                                 <button
                                     onClick={handleLogout}
