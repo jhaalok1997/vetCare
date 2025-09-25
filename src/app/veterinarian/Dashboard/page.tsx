@@ -1,4 +1,4 @@
-import Dashboard from "@/components/Veternairian/Dashboard/page";
+import Dashboard from "@/components/Veterinarian/Dashboard/page";
 
 const Dashboardpage = () => {
     return (

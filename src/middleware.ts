@@ -69,5 +69,6 @@ export const config = {
     "/profile/:path*",
     "/admin/:path*",    // protect admin
     "/tenant/:path*",   // protect tenant routes
+    "/veterinarian/:path*",  // protect veterinarian routes
   ],
 };

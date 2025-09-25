@@ -190,7 +190,7 @@ export default function Navbar() {
                   )}
                   {isAuth && userRole === "vet" && (
                     <Link
-                      href="/veterniarian/Dashboard"
+                      href="/veterinarian/Dashboard"
                       className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
                       onClick={() => setOpen(false)}
                     >
