@@ -1,6 +1,6 @@
 import Analytics from "@/components/Admin/Analytics/page"
 
-const analyticspage = () => {
+const AnalyticsPage = () => {
     return (
         <>
             <Analytics />
@@ -8,4 +8,4 @@ const analyticspage = () => {
     )
 }
 
-export default analyticspage
+export default AnalyticsPage

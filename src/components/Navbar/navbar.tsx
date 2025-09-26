@@ -60,10 +60,6 @@ export default function Navbar() {
             { name: "Contact", href: "/contact" }
           ];
 
-          if (data.user?.role === "vet") {
-            baseItems.push({ name: "Dashboard", href: "/dashboard" });
-          }
-
           setNavItems(baseItems);
         } else {
           setIsAuth(false);
@@ -106,7 +102,7 @@ export default function Navbar() {
           {/* ✅ Auth Buttons */}
           <div className="ml-6 flex gap-2 items-center">
             {!isAuth && (
-              <Link href="/signup">
+              <Link href="/Auth/signup">
                 <Button className="bg-yellow-400 text-black hover:bg-yellow-500">Sign Up</Button>
               </Link>
             )}
@@ -118,7 +114,7 @@ export default function Navbar() {
               </Link>
             )}
             {isAuth && userRole === "vet" && (
-              <Link href="/vet/vet-dashboard">
+              <Link href="/veterinarian/dashboard">
                 <Button className="bg-white text-emerald-700 hover:bg-gray-200">
                   Vet Dashboard
                 </Button>
@@ -130,7 +126,7 @@ export default function Navbar() {
               </span>
             )}
             {!isAuth && (
-              <Link href="/login">
+              <Link href="/Auth/login">
                 <Button className="bg-white text-emerald-700 hover:bg-gray-200">
                   Login
                 </Button>
@@ -172,7 +168,7 @@ export default function Navbar() {
                 <div className="flex flex-col gap-3 mt-4">
                   {!isAuth && (
                     <Link
-                      href="/signup"
+                      href="/Auth/signup"
                       className="text-lg bg-yellow-400 text-black px-4 py-2 rounded-md hover:bg-yellow-500 transition text-center"
                       onClick={() => setOpen(false)}
                     >

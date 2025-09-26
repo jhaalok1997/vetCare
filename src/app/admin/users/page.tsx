@@ -1,7 +1,7 @@
 
 import Users from "@/components/Admin/Users/page";
 
-const Userspage = () => {
+const UsersPage = () => {
     return (
         <>
             <Users />
@@ -9,4 +9,4 @@ const Userspage = () => {
     )
 }
 
-export default Userspage;
+export default UsersPage;

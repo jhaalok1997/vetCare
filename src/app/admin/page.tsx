@@ -1,8 +1,6 @@
-"use client";
-
 import AdminDashboard from "@/components/Admin/page";
 
-const AdminMainpage = () => {
+export default function AdminPage() {
     return (
         <>
             <AdminDashboard />
@@ -10,4 +8,3 @@ const AdminMainpage = () => {
     )
 }
 
-export default AdminMainpage;
