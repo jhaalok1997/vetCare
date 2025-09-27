@@ -135,7 +135,7 @@ export default function Navbar() {
             {isAuth && (
               <Button
                 onClick={handleLogout}
-                className="bg-red-500 text-white hover:bg-red-600"
+                className="bg-black text-white cursor-pointer hover:bg-gray-600"
               >
                 Logout
               </Button>
@@ -186,7 +186,7 @@ export default function Navbar() {
                   )}
                   {isAuth && userRole === "vet" && (
                     <Link
-                      href="/veterinarian/Dashboard"
+                      href="/veterinarian/dashboard"
                       className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
                       onClick={() => setOpen(false)}
                     >
@@ -213,7 +213,7 @@ export default function Navbar() {
                         setOpen(false);
                         handleLogout();
                       }}
-                      className="text-lg bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition text-center"
+                      className="text-lg bg-black text-white px-4 py-2 rounded-md hover:bg-gray-600 cursor-pointer transition text-center"
                     >
                       Logout
                     </button>

@@ -26,11 +26,11 @@ export async function middleware(req: NextRequest) {
     const { payload } = await jose.jwtVerify(token, secretKey);
     const decoded = payload as unknown as DecodedToken;
     
-    console.log("JWT Verification Success:", {
-      role: decoded.role,
-      email: decoded.email,
-      path: req.nextUrl.pathname
-    });
+    // console.log("JWT Verification Success:", {
+    //   role: decoded.role,
+    //   email: decoded.email,
+    //   path: req.nextUrl.pathname
+    // });
     
     // ✅ Add user info into headers for downstream usage
     const requestHeaders = new Headers(req.headers);
@@ -41,18 +41,18 @@ export async function middleware(req: NextRequest) {
 
     // ✅ Admin routes
     if (pathname.startsWith("/admin")) {
-      console.log("Checking admin access:", {
-        userRole: decoded.role,
-        requiredRole: "admin",
-        isAdmin: decoded.role === "admin"
-      });
+      // console.log("Checking admin access:", {
+      //   userRole: decoded.role,
+      //   requiredRole: "admin",
+      //   isAdmin: decoded.role === "admin"
+      // });
       
       if (decoded.role !== "admin") {
-        console.log("Access denied: Non-admin user attempting to access admin route");
+       // console.log("Access denied: Non-admin user attempting to access admin route");
         // Redirect non-admin users to home page instead of showing error
         return NextResponse.redirect(new URL("/", req.url));
       }
-      console.log("Admin access granted");
+     // console.log("Admin access granted");
       // Allow admin users to proceed to admin routes
       return NextResponse.next({
         request: {

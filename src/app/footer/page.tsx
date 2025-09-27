@@ -10,8 +10,8 @@ export const niconne = Niconne({
 
 export default function Footer() {
   return (
-    <footer className="bg-green-900 text-white mt-12">
-      <div className="container mx-auto px-6 py-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <footer className="bg-green-900 text-white mt-12 min-w-full">
+      <div className="container mx-auto px-10 py-8 grid grid-cols-1 md:grid-cols-3 gap-16">
 
         {/* About */}
         <div className={` ${niconne.className}`}>
@@ -22,7 +22,7 @@ export default function Footer() {
         </div>
 
         {/* Quick Links */}
-        <div className="flex flex-col md:flex-row gap-28">
+        <div className="flex flex-row gap-10 md:flex-row md:gap-12 lg:gap-24">
           <div>
             <h3 className="text-xl font-bold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm flex flex-col">
@@ -50,7 +50,7 @@ export default function Footer() {
 
 
         {/* Contact */}
-        <div>
+        <div className="lg:mx-20">
           <h3 className="text-xl font-bold mb-4">Contact Us</h3>
           <p className="text-sm">📍 hb-16, City Center, Sector-4</p>
           <p className="text-sm">📍 B.S City, Jharkhand</p>

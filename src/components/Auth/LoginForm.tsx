@@ -57,9 +57,9 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
                     // Role-based redirects
                     if (decoded.role === "admin") {
-                        router.push("/admin/dashboard");
+                        router.push("/admin");
                     } else if (decoded.role === "vet") {
-                        router.push("/vet/dashboard");
+                        router.push("/veterinarian/dashboard");
                     } else {
                         router.replace("/");
                     }
