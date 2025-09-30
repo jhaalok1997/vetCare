@@ -10,15 +10,33 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
 // Function to generate fresh FAQs from the AI model
 async function generateFAQs() {
   const prompt = `
-    Generate exactly 6 FAQs in JSON format with keys 'question' and 'answer' 
-    about veterinary science for students and Professionals. 
-    Do NOT add markdown formatting or extra text.For Reference:
-     use banaras hindu university veterinary science course Syllabus 
-     like cattle , poultry , Bvsc.
+   Generate exactly 6 FAQs in JSON format with keys "question" and "answer".
+Each FAQ should be informative, concise, and understandable for pet owners, students, and veterinary professionals.
+Base the topics on the veterinary science syllabus of Banaras Hindu University and other top Indian government veterinary universities:
+
+Tamil Nadu Veterinary and Animal Sciences University (TANUVAS)
+
+Karnataka Veterinary, Animal and Fisheries Sciences University (KVAFSU)
+
+Maharashtra Animal and Fishery Sciences University (MAFSU)
+
+West Bengal University of Animal and Fishery Sciences (WBUAFS)
+
+Guru Angad Dev Veterinary and Animal Sciences University (GADVASU)
+
+Focus on cattle, poultry, BVSc curriculum, animal health, nutrition, reproduction, and clinical practices.
+
+Make sure each answer:
+
+Starts with a simple explanation (for pet owners).
+
+Adds a student-oriented perspective (linking to syllabus/learning).
+
+Ends with a technical or professional insight (clinical/industry).
   `;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); //  llm Model
     const result = await model.generateContent(prompt);
     let text = result.response.text();
 
