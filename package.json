@@ -8,13 +8,13 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "engines": {
+    "node": "20"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@heroicons/react": "^2.2.0",
-    "@langchain/community": "^0.3.53",
-    "@langchain/core": "^0.3.72",
     "@langchain/groq": "^0.2.3",
-    "@langchain/openai": "^0.6.9",
     "@prisma/client": "^6.13.0",
     "@radix-ui/react-accordion": "^1.2.11",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -31,7 +31,6 @@
     "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
-    "langchain": "^0.3.31",
     "lucide-react": "^0.539.0",
     "mongodb": "^6.18.0",
     "mongoose": "^8.18.0",
@@ -39,7 +38,6 @@
     "node-cache": "^5.1.2",
     "node-fetch": "^3.3.2",
     "nodemailer": "^7.0.5",
-    "openai": "^5.12.2",
     "or": "^0.2.0",
     "react": "19.1.0",
     "react-dom": "19.1.0",
