@@ -126,7 +126,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             <input
                 type="email"
                 placeholder="Email"
-                className="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full mb-4 p-3 rounded-lg bg-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
             />
@@ -135,7 +135,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                 <input
                     type="password"
                     placeholder="Password"
-                    className="w-full mb-6 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full mb-6 p-3 rounded-lg  bg-gray-400  border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />
