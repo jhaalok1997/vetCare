@@ -3,7 +3,6 @@ import { ChatGroq } from "@langchain/groq";
 import { tavily } from "@tavily/core";
 import { createClient } from "redis";
 
-
 interface TavilySearchResult {
   title: string;
   url: string;
@@ -18,8 +17,6 @@ interface ChatMessage {
   role: "user" | "assistant" | "system";
   content: string;
 }
-
-
 
 // --- Redis Cloud Connection ---
 const redis = createClient({
@@ -72,14 +69,52 @@ const ENABLE_TAVILY = process.env.ENABLE_TAVILY === "true";
 console.log(`🔍 Tavily Status: ${ENABLE_TAVILY ? "Enabled" : "Disabled"}`);
 
 const vetKeywords = [
-  "veterinary","vet","animal health","diseases","b.v.sc","m.v.sc","d.v.m",
-  "livestock","cattle","poultry","dog","buffalo","cat","pet","zoonotic",
-  "anatomy","pathology","parasitology","pharmacology","swine","toxicology",
-  "surgery","diagnosis","vaccination","epidemiology","bird flu","breeding",
-  "nutrition","theriogenology","public health","animal welfare","research",
-  "microbiology","immunology","veterinarian","clinical","therapeutics",
-  "radiology","livestock production management","herd health","equine",
-  "ruminant","companion animal","exotic pets","wildlife","avian"
+  "veterinary",
+  "vet",
+  "animal health",
+  "diseases",
+  "b.v.sc",
+  "m.v.sc",
+  "d.v.m",
+  "livestock",
+  "cattle",
+  "poultry",
+  "dog",
+  "buffalo",
+  "cat",
+  "pet",
+  "zoonotic",
+  "anatomy",
+  "pathology",
+  "parasitology",
+  "pharmacology",
+  "swine",
+  "toxicology",
+  "surgery",
+  "diagnosis",
+  "vaccination",
+  "epidemiology",
+  "bird flu",
+  "breeding",
+  "nutrition",
+  "theriogenology",
+  "public health",
+  "animal welfare",
+  "research",
+  "microbiology",
+  "immunology",
+  "veterinarian",
+  "clinical",
+  "therapeutics",
+  "radiology",
+  "livestock production management",
+  "herd health",
+  "equine",
+  "ruminant",
+  "companion animal",
+  "exotic pets",
+  "wildlife",
+  "avian",
 ];
 
 function isVetQuery(query: string): boolean {
@@ -104,13 +139,15 @@ async function searchTavily(query: string): Promise<TavilySearchResponse> {
   const response = await tavilyClient.search(query, {
     search_depth: "advanced",
     include_domains: [
-      "avma.org",
-      "vin.com",
-      "merckvetmanual.com",
-      "vetfolio.com",
-      "ncbi.nlm.nih.gov",
-      "pubmed.gov",
-      "vetstudy.journeywithasr.com",
+      "veterinaryworldpublisher.org",
+      "ijvph.org",
+      "journals.acspublisher.com",
+      "epubs.icar.org.in",
+      "jivaonline.net",
+      "bmcvetres.biomedcentral.com",
+      "www.mdpi.com",
+      "openveterinaryjournal.com",
+      "www.acvim.org",
     ],
   });
 
@@ -124,7 +161,10 @@ async function searchTavily(query: string): Promise<TavilySearchResponse> {
 }
 
 function formatToBullets(text: string): string {
-  const parts = text.split(/[\n.]/).map((s) => s.trim()).filter(Boolean);
+  const parts = text
+    .split(/[\n.]/)
+    .map((s) => s.trim())
+    .filter(Boolean);
   return parts.length ? "\n" + parts.map((s) => `• ${s}`).join("\n\n") : text;
 }
 
@@ -163,8 +203,9 @@ export async function POST(req: Request) {
     while (history.length > 15) history.shift();
 
     const currentYear = new Date().getFullYear();
-    const hasRecentYearQuery = /(202[4-9]|current|latest|recent)/i.test(question);
-
+    const hasRecentYearQuery = /(202[4-9]|current|latest|recent)/i.test(
+      question
+    );
 
     // --- Tavily for fresh content
     if (ENABLE_TAVILY && hasRecentYearQuery) {
