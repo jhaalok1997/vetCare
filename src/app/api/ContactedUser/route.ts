@@ -31,8 +31,9 @@ export async function POST(req: Request) {
             contact: newContact 
         }, { status: 201 });
 
-    } catch (error) {
+    } catch (error: unknown) {
         console.error("ContactedUser error:", error);
-        return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
+        const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
+        return NextResponse.json({ error: errorMessage }, { status: 500 });
     }
 }

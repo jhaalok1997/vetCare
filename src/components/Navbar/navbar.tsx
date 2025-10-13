@@ -10,6 +10,8 @@ import { Menu } from "lucide-react";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const [isAuth, setIsAuth] = useState(false);
+  const [userRole, setUserRole] = useState<string | null>(null);
+  const [username, setUsername] = useState<string | null>(null);
 
   const handleLogout = async () => {
     try {
@@ -18,6 +20,8 @@ export default function Navbar() {
       });
       if (res.ok) {
         setIsAuth(false);
+        setUserRole(null);
+        setUsername(null);
         window.location.href = "/"; // Redirect to home page
       }
     } catch (error) {
@@ -25,21 +29,47 @@ export default function Navbar() {
     }
   };
 
-  const navItems = [
+  interface NavItem {
+    name: string;
+    href: string;
+  }
+
+  const [navItems, setNavItems] = useState<NavItem[]>([
     { name: "Home", href: "/" },
     { name: "About", href: "/about" },
     { name: "Services", href: "/services" },
     { name: "Contact", href: "/contact" }
-  ];
+  ]);
 
-  // ✅ Check auth state
+  // ✅ Check auth state and get user role
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const res = await fetch("/api/Auth/profile");
-        setIsAuth(res.ok);
+        if (res.ok) {
+          const data = await res.json();
+          setIsAuth(true);
+          setUserRole(data.user?.role || null);
+          setUsername(data.user?.username || null);
+
+          // Update navigation items based on user role
+          const baseItems = [
+            { name: "Home", href: "/" },
+            { name: "About", href: "/about" },
+            { name: "Services", href: "/services" },
+            { name: "Contact", href: "/contact" }
+          ];
+
+          setNavItems(baseItems);
+        } else {
+          setIsAuth(false);
+          setUserRole(null);
+          setUsername(null);
+        }
       } catch {
         setIsAuth(false);
+        setUserRole(null);
+        setUsername(null);
       }
     };
     checkAuth();
@@ -70,21 +100,42 @@ export default function Navbar() {
           )}
 
           {/* ✅ Auth Buttons */}
-          <div className="ml-6 flex gap-2">
+          <div className="ml-6 flex gap-2 items-center">
             {!isAuth && (
-              <Link href="/signup">
+              <Link href="/Auth/signup">
                 <Button className="bg-yellow-400 text-black hover:bg-yellow-500">Sign Up</Button>
               </Link>
             )}
-            <Link href={isAuth ? "/dashboard" : "/login"}>
-              <Button className="bg-white text-emerald-700 hover:bg-gray-200">
-                {isAuth ? "Dashboard" : "Login"}
-              </Button>
-            </Link>
+            {isAuth && userRole === "admin" && (
+              <Link href="/admin">
+                <Button className="bg-white text-emerald-700 hover:bg-gray-200">
+                  Admin Dashboard
+                </Button>
+              </Link>
+            )}
+            {isAuth && userRole === "vet" && (
+              <Link href="/veterinarian/dashboard">
+                <Button className="bg-white text-emerald-700 hover:bg-gray-200">
+                  Vet Dashboard
+                </Button>
+              </Link>
+            )}
+            {isAuth && userRole === "petOwner" && username && (
+              <span className="text-white font-medium px-3 py-2">
+                Welcome, {username}
+              </span>
+            )}
+            {!isAuth && (
+              <Link href="/Auth/login">
+                <Button className="bg-white text-emerald-700 hover:bg-gray-200">
+                  Login
+                </Button>
+              </Link>
+            )}
             {isAuth && (
               <Button
                 onClick={handleLogout}
-                className="bg-red-500 text-white hover:bg-red-600"
+                className="bg-black text-white cursor-pointer hover:bg-gray-600"
               >
                 Logout
               </Button>
@@ -117,27 +168,52 @@ export default function Navbar() {
                 <div className="flex flex-col gap-3 mt-4">
                   {!isAuth && (
                     <Link
-                      href="/signup"
+                      href="/Auth/signup"
                       className="text-lg bg-yellow-400 text-black px-4 py-2 rounded-md hover:bg-yellow-500 transition text-center"
                       onClick={() => setOpen(false)}
                     >
                       Sign Up
                     </Link>
                   )}
-                  <Link
-                    href={isAuth ? "/dashboard" : "/login"}
-                    className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
-                    onClick={() => setOpen(false)}
-                  >
-                    {isAuth ? "Dashboard" : "Login"}
-                  </Link>
+                  {isAuth && userRole === "admin" && (
+                    <Link
+                      href="/admin"
+                      className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
+                      onClick={() => setOpen(false)}
+                    >
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  {isAuth && userRole === "vet" && (
+                    <Link
+                      href="/veterinarian/dashboard"
+                      className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
+                      onClick={() => setOpen(false)}
+                    >
+                      Vet Dashboard
+                    </Link>
+                  )}
+                  {isAuth && userRole === "petOwner" && username && (
+                    <div className="text-lg text-white font-medium px-4 py-2 text-center">
+                      Welcome, {username}
+                    </div>
+                  )}
+                  {!isAuth && (
+                    <Link
+                      href="/login"
+                      className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
+                      onClick={() => setOpen(false)}
+                    >
+                      Login
+                    </Link>
+                  )}
                   {isAuth && (
                     <button
                       onClick={() => {
                         setOpen(false);
                         handleLogout();
                       }}
-                      className="text-lg bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 transition text-center"
+                      className="text-lg bg-black text-white px-4 py-2 rounded-md hover:bg-gray-600 cursor-pointer transition text-center"
                     >
                       Logout
                     </button>

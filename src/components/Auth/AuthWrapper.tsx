@@ -6,6 +6,7 @@ import SignupForm from "./SignUpForm";
 import { motion, AnimatePresence } from "framer-motion";
 import { Atom } from "react-loading-indicators"
 
+
 interface AuthWrapperProps {
     children: React.ReactNode;
 }
@@ -54,7 +55,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
                             className="absolute inset-0 flex items-center justify-center p-4"
                         >
                             <div className="w-full max-w-md">
-                                {showSignup ? (
+                                {showSignup? (
                                     <>
                                         <SignupForm onSuccess={() => setShowSignup(false)} />
                                         <p className="text-center mt-4 text-gray-600">
@@ -89,5 +90,10 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
         );
     }
 
-    return <>{children}</>;
+    return(
+     <>
+    
+       {children}
+    </>
+    )
 }

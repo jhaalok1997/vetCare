@@ -49,10 +49,11 @@ export async function POST(req: Request) {
     return NextResponse.json({
       message: "Password reset link sent to your email",
     });
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Password reset error:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Failed to process password reset';
     return NextResponse.json(
-      { error: "Failed to process password reset" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

@@ -40,10 +40,11 @@ export async function POST(req: Request) {
       { message: "Signup successful", userId: newUser._id },
       { status: 201 }
     );
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Signup error:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
     return NextResponse.json(
-      { error: "Something went wrong" },
+      { error: errorMessage },
       { status: 500 }
     );
   }

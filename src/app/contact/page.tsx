@@ -57,25 +57,25 @@ export default function Contact() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto py-16 px-6">
-      <h1 className="text-4xl font-bold mb-6">Contact Us</h1>
-      <p className="text-gray-600 mb-8">Have questions or suggestions? We love to hear from you.</p>
+    <div className="max-w-5xl mx-auto py-8 sm:py-16 px-4 sm:px-6">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-4 sm:mb-6 text-center sm:text-left">Contact Us</h1>
+      <p className="text-gray-600 mb-6 sm:mb-8 text-center sm:text-left">Have questions or suggestions? We love to hear from you.</p>
 
       {status.message && (
-        <div className={`p-4 rounded-lg mb-6 ${status.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+        <div className={`p-3 sm:p-4 rounded-lg mb-4 sm:mb-6 text-sm sm:text-base ${status.type === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
           }`}>
           {status.message}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="mt-6 grid gap-4">
+      <form onSubmit={handleSubmit} className="mt-4 sm:mt-6 grid gap-3 sm:gap-4 max-w-2xl mx-auto sm:mx-0">
         <input
           type="text"
           name="Name"
           placeholder="Your Name"
           value={formData.Name}
           onChange={handleChange}
-          className="border p-3 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="border border-gray-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm sm:text-base"
           required
         />
         <input
@@ -84,7 +84,7 @@ export default function Contact() {
           placeholder="Your Email"
           value={formData.email}
           onChange={handleChange}
-          className="border p-3 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="border border-gray-300 p-3 rounded focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm sm:text-base"
           required
         />
         <textarea
@@ -92,14 +92,14 @@ export default function Contact() {
           placeholder="Your message (minimum 25 characters)"
           value={formData.message}
           onChange={handleChange}
-          className="border p-3 rounded h-32 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          className="border border-gray-300 p-3 rounded h-24 sm:h-32 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-sm sm:text-base resize-vertical"
           required
           minLength={25}
         />
         <Button
           type="submit"
           disabled={isLoading}
-          className="bg-emerald-700 text-white py-3 rounded hover:bg-emerald-800 transition-colors disabled:bg-emerald-300"
+          className="bg-emerald-700 text-white py-2 sm:py-3 rounded hover:bg-emerald-800 transition-colors disabled:bg-emerald-300 text-sm sm:text-base"
         >
           {isLoading ? "Sending..." : "Send Message"}
         </Button>

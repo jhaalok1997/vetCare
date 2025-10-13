@@ -57,15 +57,17 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
 
                     // Role-based redirects
                     if (decoded.role === "admin") {
-                        router.push("/admin/dashboard");
+                        router.push("/admin");
                     } else if (decoded.role === "vet") {
-                        router.push("/vet/dashboard");
+                        router.push("/veterinarian/dashboard");
                     } else {
-                        router.push("/dashboard");
+                        router.replace("/");
                     }
+                    router.refresh();
                 } else {
                     // Fallback: default redirect
-                    router.push("/dashboard");
+                    router.replace("/");
+                    router.refresh();
                 }
             } else {
                 setMessage(`❌ ${data.error}`);
@@ -124,7 +126,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             <input
                 type="email"
                 placeholder="Email"
-                className="w-full mb-4 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full mb-4 p-3 rounded-lg bg-gray-400 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
             />
@@ -133,7 +135,7 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                 <input
                     type="password"
                     placeholder="Password"
-                    className="w-full mb-6 p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full mb-6 p-3 rounded-lg  bg-gray-400  border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                 />

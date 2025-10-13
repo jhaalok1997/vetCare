@@ -58,6 +58,8 @@ export default function AskVetAI() {
         body: JSON.stringify({ question, userId }),
       });
 
+
+
       const data = await res.json();
 
       if (data.history) {
@@ -76,7 +78,8 @@ export default function AskVetAI() {
       console.error("❌ Error asking VetAI:", error);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "⚠️ Something went wrong." },
+        { role: "assistant", content: "⚠️ Sorry, I'm having trouble right now. Please try again shortly." },
+
       ]);
     }
 
@@ -139,11 +142,10 @@ export default function AskVetAI() {
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
-                  className={`px-3 py-2 rounded-2xl shadow-sm max-w-[90%] ${
-                    msg.role === "user"
-                      ? "self-end bg-green-600 text-white"
-                      : "self-start bg-green-50 border border-green-200 text-green-900"
-                  }`}
+                  className={`px-3 py-2 rounded-2xl shadow-sm max-w-[90%] ${msg.role === "user"
+                    ? "self-end bg-green-600 text-white"
+                    : "self-start bg-green-50 border border-green-200 text-green-900"
+                    }`}
                 >
                   {msg.content}
                 </div>
