@@ -1,17 +1,19 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import { jwtVerify, type JWTPayload } from "jose";
 
-const SECRET = process.env.JWT_SECRET || "supersecret";
+const SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET || "supersecret"
+);
 
-interface DecodedToken extends JwtPayload {
+interface DecodedToken extends JWTPayload {
   id: string;
   email: string;
   role: string;
   tenantId: string;
 }
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const token = req.cookies.get("auth")?.value;
 
   if (!token) {
@@ -19,8 +21,9 @@ export function middleware(req: NextRequest) {
   }
 
   try {
-    // ✅ Decode token
-    const decoded = jwt.verify(token, SECRET) as DecodedToken;
+    // ✅ Verify token using JOSE
+    const { payload } = await jwtVerify(token, SECRET);
+    const decoded = payload as DecodedToken;
 
     // RBAC rules
     const pathname = req.nextUrl.pathname;
@@ -28,19 +31,25 @@ export function middleware(req: NextRequest) {
     // ✅ Admin routes
     if (pathname.startsWith("/admin")) {
       if (decoded.role !== "admin") {
-        return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
+        return NextResponse.json(
+          { error: "Forbidden: Admins only" },
+          { status: 403 }
+        );
       }
     }
 
-    // ✅ Tenant isolation (example: /tenant/[tenantId]/...)
+    // ✅ Tenant isolation
     if (pathname.startsWith("/tenant/")) {
       const tenantFromUrl = pathname.split("/")[2];
       if (tenantFromUrl && tenantFromUrl !== decoded.tenantId) {
-        return NextResponse.json({ error: "Forbidden: Wrong tenant" }, { status: 403 });
+        return NextResponse.json(
+          { error: "Forbidden: Wrong tenant" },
+          { status: 403 }
+        );
       }
     }
 
-    // ✅ Add user info into headers for downstream usage
+    // ✅ Add user info to headers
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set("x-user", JSON.stringify(decoded));
 
@@ -51,12 +60,11 @@ export function middleware(req: NextRequest) {
   }
 }
 
-// ✅ Protect routes
 export const config = {
   matcher: [
     "/dashboard/:path*",
     "/profile/:path*",
-    "/admin/:path*",    // protect admin
-    "/tenant/:path*",   // protect tenant routes
+    "/admin/:path*",
+    "/tenant/:path*",
   ],
 };
