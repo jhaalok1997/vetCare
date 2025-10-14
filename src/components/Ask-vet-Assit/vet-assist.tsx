@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion"; // for smooth animations
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ChatMessage {
   role: "user" | "assistant";
@@ -13,10 +13,10 @@ export default function AskVetAI() {
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false); // sidebar toggle
+  const [open, setOpen] = useState(false);
   const [userId, setUserId] = useState<string>("");
 
-  // 🔑 Generate or load persistent userId
+  // 🔑 Generate or load a unique userId once per browser
   useEffect(() => {
     let uid = localStorage.getItem("userId");
     if (!uid) {
@@ -24,31 +24,41 @@ export default function AskVetAI() {
       localStorage.setItem("userId", uid);
     }
     setUserId(uid);
-
-    // Load chat history if exists
-    const storedHistory = localStorage.getItem("chatHistory");
-    if (storedHistory) {
-      setMessages(JSON.parse(storedHistory));
-    }
   }, []);
 
-  // 📝 Sync messages with localStorage
+  // 🔄 Load chat history from Redis
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem("chatHistory", JSON.stringify(messages));
-    }
-  }, [messages]);
+    if (!userId) return;
 
-  // ❌ Clear chat when closed
+    const fetchChatHistory = async () => {
+      try {
+        const res = await fetch("/api/getUserChatHistory", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userId }),
+        });
+
+        const data = await res.json();
+        if (data.history && Array.isArray(data.history)) {
+          setMessages(data.history);
+        }
+      } catch (err) {
+        console.error("⚠️ Failed to load chat history:", err);
+      }
+    };
+
+    fetchChatHistory();
+  }, [userId]);
+
+  // ❌ Clear chat (local view only — Redis history remains)
   const handleClose = () => {
     setOpen(false);
     setMessages([]);
-    localStorage.removeItem("chatHistory");
   };
 
-  // 🚀 Handle Ask
+  // 🚀 Send question to backend
   const handleAsk = async () => {
-    if (!question.trim() || !userId) return;
+    if (!question.trim() || !userId || loading) return;
     setLoading(true);
 
     try {
@@ -58,14 +68,11 @@ export default function AskVetAI() {
         body: JSON.stringify({ question, userId }),
       });
 
-
-
       const data = await res.json();
 
-      if (data.history) {
+      if (data.history && Array.isArray(data.history)) {
         setMessages(data.history);
       } else if (data.answer) {
-        // fallback
         setMessages((prev) => [
           ...prev,
           { role: "user", content: question },
@@ -78,25 +85,31 @@ export default function AskVetAI() {
       console.error("❌ Error asking VetAI:", error);
       setMessages((prev) => [
         ...prev,
-        { role: "assistant", content: "⚠️ Sorry, I'm having trouble right now. Please try again shortly." },
-
+        {
+          role: "assistant",
+          content:
+            "⚠️ Sorry, I'm having trouble right now. Please try again shortly.",
+        },
       ]);
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
+
+  // 🧩 Scroll chat to bottom when messages change
+  useEffect(() => {
+    const chatBody = document.querySelector(".chat-scroll-container");
+    if (chatBody) chatBody.scrollTop = chatBody.scrollHeight;
+  }, [messages]);
 
   return (
     <section className="relative">
-      {/* Toggle Button */}
-      <Button
-        onClick={() => setOpen(!open)}
-        className="text-green-700"
-      >
+      {/* Toggle Chat Button */}
+      <Button onClick={() => setOpen(!open)} className="text-green-700">
         {open ? "Close Vet🐾Care Assistant" : "Ask Vet🐾Care Assistant"}
       </Button>
 
-      {/* Overlay for mobile */}
+      {/* Background overlay for mobile */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -109,7 +122,7 @@ export default function AskVetAI() {
         )}
       </AnimatePresence>
 
-      {/* Sidebar / Drawer */}
+      {/* Chat Drawer */}
       <AnimatePresence>
         {open && (
           <motion.div
@@ -128,28 +141,25 @@ export default function AskVetAI() {
             {/* Header */}
             <div className="p-4 border-b flex justify-between items-center bg-green-200 rounded-t-2xl sm:rounded-none">
               <h2 className="font-bold text-lg text-green-900">Ask Vet🐾Care</h2>
-              <Button
-                size="sm"
-                variant="ghost"
-                onClick={handleClose}
-              >
+              <Button size="sm" variant="ghost" onClick={handleClose}>
                 ✖
               </Button>
             </div>
 
             {/* Chat Body */}
-            <div className="flex flex-col flex-grow overflow-y-auto p-4 gap-3">
+            <div className="flex flex-col flex-grow overflow-y-auto p-4 gap-3 chat-scroll-container">
               {messages.map((msg, idx) => (
                 <div
                   key={idx}
                   className={`px-3 py-2 rounded-2xl shadow-sm max-w-[90%] ${msg.role === "user"
-                    ? "self-end bg-green-600 text-white"
-                    : "self-start bg-green-50 border border-green-200 text-green-900"
+                      ? "self-end bg-green-600 text-white"
+                      : "self-start bg-green-50 border border-green-200 text-green-900"
                     }`}
                 >
                   {msg.content}
                 </div>
               ))}
+
               {loading && (
                 <div className="self-start bg-gray-100 px-3 py-2 rounded-2xl text-gray-600 italic">
                   Thinking...
@@ -165,13 +175,19 @@ export default function AskVetAI() {
                 placeholder="Ask about veterinary problems..."
                 value={question}
                 onChange={(e) => setQuestion(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && !e.shiftKey) {
+                    e.preventDefault();
+                    handleAsk();
+                  }
+                }}
               />
               <Button
                 onClick={handleAsk}
                 disabled={loading}
                 className="bg-green-600 text-white hover:bg-green-700"
               >
-                Send
+                {loading ? "Sending..." : "Send"}
               </Button>
             </div>
           </motion.div>
