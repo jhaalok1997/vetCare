@@ -20,7 +20,10 @@ export default function VetDashboard() {
                     const data = await res.json();
                     if (data.user?.role === "admin") {
                         router.push("/admin");
-                    } else if (data.user?.role !== "vet") {
+                    }else if(data.user?.role ==="vet"){
+                        router.push("/veterinarian/Dashboard")
+                    }
+                     else if (data.user?.role !== "vet") {
                         router.push("/");
                     }
                 } else {

@@ -33,7 +33,7 @@ export default function Footer() {
             </ul>
           </div>
 
-           {/* Services */}
+          {/* Services */}
 
           <div>
             <h3 className="text-xl font-bold mb-4">Services</h3>
@@ -52,7 +52,7 @@ export default function Footer() {
         {/* Contact */}
         <div className="lg:mx-20">
           <h3 className="text-xl font-bold mb-4">Contact Us</h3>
-          <p className="text-sm">📍 hb-16, City Center, Sector-4</p>
+          <p className="text-sm">📍 hb-16, City Center,Sector-4</p>
           <p className="text-sm">📍 B.S City, Jharkhand</p>
           <p className="text-sm">📧 support@vetcare.com</p>
           <p className="text-sm">📞 +91 9348516261</p>

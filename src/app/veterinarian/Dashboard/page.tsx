@@ -1,4 +1,4 @@
-"use client";
+
 import Dashboard from "@/components/Veterinarian/Dashboard/page";
 
 const Dashboardpage = () => {

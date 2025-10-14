@@ -47,10 +47,25 @@ export async function middleware(req: NextRequest) {
       // ✅ Admin access granted - proceed with user headers
       return NextResponse.next({
         request: {
-          headers: requestHeaders
-        }
+          headers: requestHeaders,
+        },
       });
     }
+
+    // if (pathname.startsWith("/veterinarian")) {
+    //   if (decoded.role !== "vet") {
+    //     return NextResponse.json(
+    //       { error: "Forbidden: Vet only" },
+    //       { status: 403 }
+    //     );
+    //   }
+    //   // ✅ Admin access granted - proceed with user headers
+    //   return NextResponse.next({
+    //     request: {
+    //       headers: requestHeaders,
+    //     },
+    //   });
+    // }
 
     // ✅ Tenant isolation - ensure users can only access their own tenant data
     if (pathname.startsWith("/tenant/")) {
@@ -64,12 +79,11 @@ export async function middleware(req: NextRequest) {
     }
 
     // ✅ Allow access to all other protected routes with user info in headers
-    return NextResponse.next({ 
-      request: { 
-        headers: requestHeaders 
-      } 
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
     });
-
   } catch (err) {
     // ✅ Handle JWT verification errors (expired, invalid, malformed tokens)
     console.error("JWT verification failed:", err);
@@ -80,9 +94,9 @@ export async function middleware(req: NextRequest) {
 // ✅ Configure middleware to protect specific route patterns
 export const config = {
   matcher: [
-    "/dashboard/:path*",  // Protect all dashboard routes
-    "/profile/:path*",    // Protect all profile routes
-    "/admin/:path*",      // Protect all admin routes (with role check)
-    "/tenant/:path*",     // Protect all tenant routes (with tenant isolation)
+    "/dashboard/:path*", // Protect all dashboard routes
+    "/profile/:path*", // Protect all profile routes
+    "/admin/:path*", // Protect all admin routes (with role check)
+    "/tenant/:path*", // Protect all tenant routes (with tenant isolation)
   ],
 };

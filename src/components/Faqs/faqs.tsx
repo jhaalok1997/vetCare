@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { ThreeDot } from "react-loading-indicators";
 
 interface FAQ {
   question: string;
@@ -32,7 +33,9 @@ export default function FAQComponent() {
     return () => clearInterval(interval);
   }, []);
 
-  if (loading) return <p className="text-center">Loading FAQs...</p>;
+  if (loading) return <p className="text-center">
+    <ThreeDot variant="bob" color="#32cd32" size="large" text="Loading... FAQS" textColor="#af5151" />
+  </p>;
 
   return (
     <section className="max-w-3xl mx-auto p-4 sm:p-6">

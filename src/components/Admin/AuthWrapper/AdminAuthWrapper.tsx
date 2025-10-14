@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Atom } from "react-loading-indicators";
+import { BlinkBlur } from "react-loading-indicators";
 
 interface AdminAuthWrapperProps {
   children: React.ReactNode;
@@ -47,7 +47,7 @@ export default function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <Atom color="#32cd32" size="large" text="Verifying Admin Access..." textColor="#af5151" />
+        <BlinkBlur color="#32cd32" size="medium" text="Wait For A While..." textColor="#01250e" />
       </div>
     );
   }
