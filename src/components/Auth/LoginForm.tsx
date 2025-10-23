@@ -18,6 +18,14 @@ interface DecodedToken {
     exp: number;
 }
 
+interface UserClient {
+    id?: string;
+    _id?: string;
+    email?: string;
+    role?: string;
+    tenantId?: string;
+}
+
 export default function LoginForm({ onSuccess }: LoginFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -47,18 +55,38 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
             if (res.ok) {
                 setMessage("✅ Login successful!");
 
-                // 🔑 The token is set in an HttpOnly cookie by backend,
-                // but for redirect logic we can also return it in the response (optional).
-                if (data.token) {
-                    const decoded: DecodedToken = jwtDecode(data.token);
+                // Prefer the explicit user object returned by the API
+                const returnedUser = data.user ? data.user : null;
+                let userForClient: UserClient | null = null;
 
-                    // Call parent callback
-                    onSuccess?.(decoded);
+                if (returnedUser) {
+                    userForClient = returnedUser;
+                } else if (data.token) {
+                    // Fallback: decode token payload if API didn't return user object
+                    const decoded = jwtDecode(data.token as string) as DecodedToken;
+                    userForClient = {
+                        id: decoded.id,
+                        email: decoded.email,
+                        role: decoded.role,
+                        tenantId: decoded.tenantId,
+                    };
+                }
+
+                // Persist user to localStorage for x-user header usage
+                if (userForClient) {
+                    try {
+                        localStorage.setItem('user', JSON.stringify(userForClient));
+                    } catch (e) {
+                        console.warn('Unable to persist user to localStorage', e);
+                    }
+
+                    // Call parent callback with the stored user object
+                    onSuccess?.(userForClient);
 
                     // Role-based redirects
-                    if (decoded.role === "admin") {
+                    if (userForClient.role === "admin") {
                         router.push("/admin");
-                    } else if (decoded.role === "vet") {
+                    } else if (userForClient.role === "vet") {
                         router.push("/veterinarian/dashboard");
                     } else {
                         router.replace("/");

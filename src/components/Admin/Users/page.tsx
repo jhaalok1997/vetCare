@@ -49,14 +49,44 @@ export default function ActiveUsersPage() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                const res = await fetch("/api/admin/users");
+                // Get current user from localStorage and validate
+                const rawUser = localStorage.getItem('user');
+                if (!rawUser) {
+                    alert('User not authenticated. Please log in as admin.');
+                    setLoading(false);
+                    return;
+                }
+                let userObj;
+                try {
+                    userObj = JSON.parse(rawUser);
+                } catch  {
+                    alert('Corrupted user data. Please log in again.');
+                    setLoading(false);
+                    return;
+                }
+                if (!userObj.role || userObj.role !== 'admin') {
+                    alert('Access denied. Only admin users can view this page.');
+                    setLoading(false);
+                    return;
+                }
+
+                const res = await fetch("/api/admin/users", {
+                    headers: {
+                        'x-user': JSON.stringify(userObj),
+                        'Content-Type': 'application/json',
+                    },
+                });
                 if (res.ok) {
                     const data = await res.json();
                     setUsers(data.users);
                     setStats(data.stats);
+                } else {
+                    const errorData = await res.json();
+                    alert(errorData.error || 'Failed to fetch users');
                 }
             } catch (error) {
                 console.error("Failed to fetch users:", error);
+                alert('An error occurred while fetching users.');
             } finally {
                 setLoading(false);
             }

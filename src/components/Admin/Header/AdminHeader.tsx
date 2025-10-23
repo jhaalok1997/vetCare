@@ -26,6 +26,7 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
                 method: "POST",
             });
             if (res.ok) {
+                try { localStorage.removeItem('user'); } catch {}
                 router.push("/login");
             }
         } catch (error) {

@@ -12,6 +12,24 @@ export default function Navbar() {
   const [isAuth, setIsAuth] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [hideForAdmin, setHideForAdmin] = useState(false);
+
+  // Determine if Navbar should be hidden for admin users
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('user');
+      if (raw) {
+        const u = JSON.parse(raw);
+        if (u && u.role === 'admin') {
+          setHideForAdmin(true);
+          return;
+        }
+      }
+    } catch {
+      // ignore
+    }
+    setHideForAdmin(false);
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -22,6 +40,7 @@ export default function Navbar() {
         setIsAuth(false);
         setUserRole(null);
         setUsername(null);
+        try { localStorage.removeItem('user'); } catch { }
         window.location.href = "/"; // Redirect to home page
       }
     } catch (error) {
@@ -76,154 +95,156 @@ export default function Navbar() {
   }, []);
 
   return (
-    <header className="bg-emerald-700 text-white shadow-md sticky top-0 z-50">
-      <div className="container mx-auto flex items-center justify-between px-8 py-3">
-        {/* Logo */}
-        <Link href="/" className="text-2xl font-bold tracking-wide hover:scale-105 transition-transform">
-          Vet🐾Care
-        </Link>
+    hideForAdmin ? null : (
+      <header className="bg-emerald-700 text-white shadow-md sticky top-0 z-50">
+        <div className="container mx-auto flex items-center justify-between px-8 py-3">
+          {/* Logo */}
+          <Link href="/" className="text-2xl font-bold tracking-wide hover:scale-105 transition-transform">
+            Vet🐾Care
+          </Link>
 
-        {/* Desktop Menu */}
-        <nav className="hidden md:flex items-center gap-4">
-          {isAuth && (
-            <NavigationMenu>
-              <NavigationMenuList>
-                {navItems.map((item) => (
-                  <NavigationMenuItem key={item.name}>
-                    <Link href={item.href} className="px-4 py-2 hover:bg-emerald-600 rounded-md transition">
+          {/* Desktop Menu */}
+          <nav className="hidden md:flex items-center gap-4">
+            {isAuth && (
+              <NavigationMenu>
+                <NavigationMenuList>
+                  {navItems.map((item) => (
+                    <NavigationMenuItem key={item.name}>
+                      <Link href={item.href} className="px-4 py-2 hover:bg-emerald-600 rounded-md transition">
+                        {item.name}
+                      </Link>
+                    </NavigationMenuItem>
+                  ))}
+                </NavigationMenuList>
+              </NavigationMenu>
+            )}
+
+            {/* ✅ Auth Buttons */}
+            <div className="ml-6 flex gap-2 items-center">
+              {!isAuth && (
+                <Link href="/Auth/signup">
+                  <Button className="bg-yellow-400 text-black hover:bg-yellow-500">Sign Up</Button>
+                </Link>
+              )}
+              {isAuth && userRole === "admin" && (
+                <Link href="/admin">
+                  <Button className="bg-white text-emerald-700 hover:bg-gray-200">
+                    Admin Dashboard
+                  </Button>
+                </Link>
+              )}
+              {isAuth && userRole === "vet" && (
+                <Link href="/veterinarian/Dashboard">
+                  <Button className="bg-white text-emerald-700 hover:bg-gray-200">
+                    Vet Dashboard
+                  </Button>
+                </Link>
+              )}
+              {isAuth && userRole === "petOwner" && username && (
+                <span className="text-white font-medium px-3 py-2">
+                  Welcome, {username}
+                </span>
+              )}
+              {!isAuth && (
+                <Link href="/Auth/login">
+                  <Button className="bg-white text-emerald-700 hover:bg-gray-200">
+                    Login
+                  </Button>
+                </Link>
+              )}
+              {isAuth && (
+                <Button
+                  onClick={handleLogout}
+                  className="bg-black text-white cursor-pointer hover:bg-gray-600"
+                >
+                  Logout
+                </Button>
+              )}
+            </div>
+          </nav>
+
+          {/* Mobile Menu Button */}
+          <div className="md:hidden">
+            <Sheet open={open} onOpenChange={setOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" className="text-white">
+                  <Menu size={24} />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="right" className="bg-emerald-700 text-white">
+                <div className="flex flex-col gap-4 mt-6">
+                  {isAuth && navItems.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className="text-lg hover:bg-emerald-600 px-4 py-2 rounded-md transition"
+                      onClick={() => setOpen(false)}
+                    >
                       {item.name}
                     </Link>
-                  </NavigationMenuItem>
-                ))}
-              </NavigationMenuList>
-            </NavigationMenu>
-          )}
+                  ))}
 
-          {/* ✅ Auth Buttons */}
-          <div className="ml-6 flex gap-2 items-center">
-            {!isAuth && (
-              <Link href="/Auth/signup">
-                <Button className="bg-yellow-400 text-black hover:bg-yellow-500">Sign Up</Button>
-              </Link>
-            )}
-            {isAuth && userRole === "admin" && (
-              <Link href="/admin">
-                <Button className="bg-white text-emerald-700 hover:bg-gray-200">
-                  Admin Dashboard
-                </Button>
-              </Link>
-            )}
-            {isAuth && userRole === "vet" && (
-              <Link href="/veterinarian/Dashboard">
-                <Button className="bg-white text-emerald-700 hover:bg-gray-200">
-                  Vet Dashboard
-                </Button>
-              </Link>
-            )}
-            {isAuth && userRole === "petOwner" && username && (
-              <span className="text-white font-medium px-3 py-2">
-                Welcome, {username}
-              </span>
-            )}
-            {!isAuth && (
-              <Link href="/Auth/login">
-                <Button className="bg-white text-emerald-700 hover:bg-gray-200">
-                  Login
-                </Button>
-              </Link>
-            )}
-            {isAuth && (
-              <Button
-                onClick={handleLogout}
-                className="bg-black text-white cursor-pointer hover:bg-gray-600"
-              >
-                Logout
-              </Button>
-            )}
-          </div>
-        </nav>
-
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <Sheet open={open} onOpenChange={setOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" className="text-white">
-                <Menu size={24} />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-emerald-700 text-white">
-              <div className="flex flex-col gap-4 mt-6">
-                {isAuth && navItems.map((item) => (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    className="text-lg hover:bg-emerald-600 px-4 py-2 rounded-md transition"
-                    onClick={() => setOpen(false)}
-                  >
-                    {item.name}
-                  </Link>
-                ))}
-
-                {/* ✅ Mobile Auth Buttons */}
-                <div className="flex flex-col gap-3 mt-4">
-                  {!isAuth && (
-                    <Link
-                      href="/Auth/signup"
-                      className="text-lg bg-yellow-400 text-black px-4 py-2 rounded-md hover:bg-yellow-500 transition text-center"
-                      onClick={() => setOpen(false)}
-                    >
-                      Sign Up
-                    </Link>
-                  )}
-                  {isAuth && userRole === "admin" && (
-                    <Link
-                      href="/admin"
-                      className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
-                      onClick={() => setOpen(false)}
-                    >
-                      Admin Dashboard
-                    </Link>
-                  )}
-                  {isAuth && userRole === "vet" && (
-                    <Link
-                      href="/veterinarian/Dashboard"
-                      className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
-                      onClick={() => setOpen(false)}
-                    >
-                      Vet Dashboard
-                    </Link>
-                  )}
-                  {isAuth && userRole === "petOwner" && username && (
-                    <div className="text-lg text-white font-medium px-4 py-2 text-center">
-                      Welcome, {username}
-                    </div>
-                  )}
-                  {!isAuth && (
-                    <Link
-                      href="/login"
-                      className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
-                      onClick={() => setOpen(false)}
-                    >
-                      Login
-                    </Link>
-                  )}
-                  {isAuth && (
-                    <button
-                      onClick={() => {
-                        setOpen(false);
-                        handleLogout();
-                      }}
-                      className="text-lg bg-black text-white px-4 py-2 rounded-md hover:bg-gray-600 cursor-pointer transition text-center"
-                    >
-                      Logout
-                    </button>
-                  )}
+                  {/* ✅ Mobile Auth Buttons */}
+                  <div className="flex flex-col gap-3 mt-4">
+                    {!isAuth && (
+                      <Link
+                        href="/Auth/signup"
+                        className="text-lg bg-yellow-400 text-black px-4 py-2 rounded-md hover:bg-yellow-500 transition text-center"
+                        onClick={() => setOpen(false)}
+                      >
+                        Sign Up
+                      </Link>
+                    )}
+                    {isAuth && userRole === "admin" && (
+                      <Link
+                        href="/admin"
+                        className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
+                        onClick={() => setOpen(false)}
+                      >
+                        Admin Dashboard
+                      </Link>
+                    )}
+                    {isAuth && userRole === "vet" && (
+                      <Link
+                        href="/veterinarian/Dashboard"
+                        className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
+                        onClick={() => setOpen(false)}
+                      >
+                        Vet Dashboard
+                      </Link>
+                    )}
+                    {isAuth && userRole === "petOwner" && username && (
+                      <div className="text-lg text-white font-medium px-4 py-2 text-center">
+                        Welcome, {username}
+                      </div>
+                    )}
+                    {!isAuth && (
+                      <Link
+                        href="/login"
+                        className="text-lg bg-white text-emerald-700 px-4 py-2 rounded-md hover:bg-gray-200 transition text-center"
+                        onClick={() => setOpen(false)}
+                      >
+                        Login
+                      </Link>
+                    )}
+                    {isAuth && (
+                      <button
+                        onClick={() => {
+                          setOpen(false);
+                          handleLogout();
+                        }}
+                        className="text-lg bg-black text-white px-4 py-2 rounded-md hover:bg-gray-600 cursor-pointer transition text-center"
+                      >
+                        Logout
+                      </button>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+    )
   );
 }

@@ -1,49 +1,93 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { 
-  ChartBarIcon, 
-  ArrowTrendingUpIcon, 
+import {
   UsersIcon,
-  CalendarIcon 
+  UserGroupIcon,
+  UserCircleIcon
 } from "@heroicons/react/24/outline";
 
-interface AnalyticsData {
-  userGrowth: {
-    thisMonth: number;
-    lastMonth: number;
-    growth: number;
+interface DashboardData {
+  overview: {
+    totalUsers: number;
+    totalPetOwners: number;
+    totalVets: number;
+    totalAdmins: number;
+    roleDistribution: {
+      petOwners: { count: number; percentage: string };
+      vets: { count: number; percentage: string };
+      admins: { count: number; percentage: string };
+    };
   };
-  activityStats: {
-    totalSessions: number;
-    averageSessionTime: string;
-    peakHours: string[];
+  activity: {
+    last24Hours: { activeUsers: number; newRegistrations: number };
+    last7Days: { activeUsers: number; newRegistrations: number };
+    last30Days: { activeUsers: number; newRegistrations: number };
   };
-  roleDistribution: {
-    petOwner: number;
-    vet: number;
-    admin: number;
-  };
+  recentActivity: Array<{
+    id: string;
+    username: string;
+    email: string;
+    role: string;
+    tenantId: string;
+    timestamp: string;
+    action: string;
+  }>;
 }
 
 export default function AnalyticsPage() {
-  const [data, setData] = useState<AnalyticsData>({
-    userGrowth: { thisMonth: 0, lastMonth: 0, growth: 0 },
-    activityStats: { totalSessions: 0, averageSessionTime: "0m", peakHours: [] },
-    roleDistribution: { petOwner: 0, vet: 0, admin: 0 }
+  const [data, setData] = useState<DashboardData>({
+    overview: {
+      totalUsers: 0,
+      totalPetOwners: 0,
+      totalVets: 0,
+      totalAdmins: 0,
+      roleDistribution: {
+        petOwners: { count: 0, percentage: "0" },
+        vets: { count: 0, percentage: "0" },
+        admins: { count: 0, percentage: "0" }
+      }
+    },
+    activity: {
+      last24Hours: { activeUsers: 0, newRegistrations: 0 },
+      last7Days: { activeUsers: 0, newRegistrations: 0 },
+      last30Days: { activeUsers: 0, newRegistrations: 0 }
+    },
+    recentActivity: []
   });
   const [loading, setLoading] = useState(true);
+
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchAnalytics = async () => {
       try {
-        const res = await fetch("/api/admin/analytics");
-        if (res.ok) {
-          const analyticsData = await res.json();
-          setData(analyticsData);
+        setError(null);
+        // Get current user from localStorage or your auth management system
+        const currentUser = localStorage.getItem('user');
+        if (!currentUser) {
+          setError('User not authenticated');
+          return;
         }
+
+        const res = await fetch("/api/admin/dashboard", {
+          headers: {
+            'x-user': currentUser, // Send the user data in header
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.error || 'Failed to fetch dashboard data');
+        }
+
+        const dashboardData = await res.json();
+        console.log('Dashboard Data:', dashboardData); // Debug log
+        setData(dashboardData);
       } catch (error) {
-        console.error("Failed to fetch analytics:", error);
+        console.error("Failed to fetch dashboard data:", error);
+        setError(error instanceof Error ? error.message : 'An error occurred');
       } finally {
         setLoading(false);
       }
@@ -55,7 +99,21 @@ export default function AnalyticsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+        <div className="flex flex-col items-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500 mb-4"></div>
+          <p className="text-gray-500">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="bg-red-50 text-red-800 rounded-lg p-4">
+          <h3 className="text-lg font-medium mb-2">Error Loading Dashboard</h3>
+          <p>{error}</p>
+        </div>
       </div>
     );
   }
@@ -63,64 +121,95 @@ export default function AnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Analytics</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Dashboard Analytics</h1>
         <p className="mt-1 text-sm text-gray-500">
-          System analytics and insights
+          Comprehensive system analytics and user insights
         </p>
       </div>
 
-      {/* User Growth */}
-      <div className="bg-white shadow rounded-lg p-6">
-        <div className="flex items-center">
-          <ArrowTrendingUpIcon className="h-8 w-8 text-emerald-500 mr-3" />
-          <h3 className="text-lg font-medium text-gray-900">User Growth</h3>
+      {/* Overview Stats */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="flex items-center">
+            <UserGroupIcon className="h-8 w-8 text-blue-500 mr-3" />
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{data.overview.totalUsers}</p>
+              <p className="text-sm text-gray-500">Total Users</p>
+            </div>
+          </div>
         </div>
-        <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{data.userGrowth.thisMonth}</p>
-            <p className="text-sm text-gray-500">This Month</p>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="flex items-center">
+            <UsersIcon className="h-8 w-8 text-green-500 mr-3" />
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{data.overview.totalPetOwners}</p>
+              <p className="text-sm text-gray-500">Pet Owners</p>
+            </div>
           </div>
-          <div className="text-center">
-            <p className="text-2xl font-bold text-gray-900">{data.userGrowth.lastMonth}</p>
-            <p className="text-sm text-gray-500">Last Month</p>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="flex items-center">
+            <UserCircleIcon className="h-8 w-8 text-purple-500 mr-3" />
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{data.overview.totalVets}</p>
+              <p className="text-sm text-gray-500">Veterinarians</p>
+            </div>
           </div>
-          <div className="text-center">
-            <p className={`text-2xl font-bold ${data.userGrowth.growth >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-              {data.userGrowth.growth >= 0 ? '+' : ''}{data.userGrowth.growth}%
-            </p>
-            <p className="text-sm text-gray-500">Growth</p>
+        </div>
+
+        <div className="bg-white shadow rounded-lg p-6">
+          <div className="flex items-center">
+            <UsersIcon className="h-8 w-8 text-red-500 mr-3" />
+            <div>
+              <p className="text-2xl font-bold text-gray-900">{data.overview.totalAdmins}</p>
+              <p className="text-sm text-gray-500">Administrators</p>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Activity Stats */}
+      {/* Activity Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex items-center">
-            <UsersIcon className="h-8 w-8 text-blue-500 mr-3" />
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{data.activityStats.totalSessions}</p>
-              <p className="text-sm text-gray-500">Total Sessions</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Last 24 Hours</h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Active Users</span>
+              <span className="text-lg font-semibold">{data.activity.last24Hours.activeUsers}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">New Registrations</span>
+              <span className="text-lg font-semibold">{data.activity.last24Hours.newRegistrations}</span>
             </div>
           </div>
         </div>
 
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex items-center">
-            <CalendarIcon className="h-8 w-8 text-purple-500 mr-3" />
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{data.activityStats.averageSessionTime}</p>
-              <p className="text-sm text-gray-500">Avg Session Time</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Last 7 Days</h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Active Users</span>
+              <span className="text-lg font-semibold">{data.activity.last7Days.activeUsers}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">New Registrations</span>
+              <span className="text-lg font-semibold">{data.activity.last7Days.newRegistrations}</span>
             </div>
           </div>
         </div>
 
         <div className="bg-white shadow rounded-lg p-6">
-          <div className="flex items-center">
-            <ChartBarIcon className="h-8 w-8 text-orange-500 mr-3" />
-            <div>
-              <p className="text-2xl font-bold text-gray-900">{data.activityStats.peakHours.length}</p>
-              <p className="text-sm text-gray-500">Peak Hours</p>
+          <h3 className="text-lg font-medium text-gray-900 mb-4">Last 30 Days</h3>
+          <div className="space-y-4">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">Active Users</span>
+              <span className="text-lg font-semibold">{data.activity.last30Days.activeUsers}</span>
+            </div>
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-500">New Registrations</span>
+              <span className="text-lg font-semibold">{data.activity.last30Days.newRegistrations}</span>
             </div>
           </div>
         </div>
@@ -134,51 +223,77 @@ export default function AnalyticsPage() {
             <span className="text-sm font-medium text-gray-700">Pet Owners</span>
             <div className="flex items-center">
               <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                <div 
-                  className="bg-green-500 h-2 rounded-full" 
-                  style={{ width: `${(data.roleDistribution.petOwner / (data.roleDistribution.petOwner + data.roleDistribution.vet + data.roleDistribution.admin)) * 100}%` }}
+                <div
+                  className="bg-green-500 h-2 rounded-full"
+                  style={{ width: `${data.overview.roleDistribution.petOwners.percentage}%` }}
                 ></div>
               </div>
-              <span className="text-sm text-gray-500">{data.roleDistribution.petOwner}</span>
+              <span className="text-sm text-gray-500">
+                {data.overview.roleDistribution.petOwners.count} ({data.overview.roleDistribution.petOwners.percentage}%)
+              </span>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-700">Veterinarians</span>
             <div className="flex items-center">
               <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                <div 
-                  className="bg-blue-500 h-2 rounded-full" 
-                  style={{ width: `${(data.roleDistribution.vet / (data.roleDistribution.petOwner + data.roleDistribution.vet + data.roleDistribution.admin)) * 100}%` }}
+                <div
+                  className="bg-blue-500 h-2 rounded-full"
+                  style={{ width: `${data.overview.roleDistribution.vets.percentage}%` }}
                 ></div>
               </div>
-              <span className="text-sm text-gray-500">{data.roleDistribution.vet}</span>
+              <span className="text-sm text-gray-500">
+                {data.overview.roleDistribution.vets.count} ({data.overview.roleDistribution.vets.percentage}%)
+              </span>
             </div>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-700">Admins</span>
             <div className="flex items-center">
               <div className="w-32 bg-gray-200 rounded-full h-2 mr-3">
-                <div 
-                  className="bg-red-500 h-2 rounded-full" 
-                  style={{ width: `${(data.roleDistribution.admin / (data.roleDistribution.petOwner + data.roleDistribution.vet + data.roleDistribution.admin)) * 100}%` }}
+                <div
+                  className="bg-red-500 h-2 rounded-full"
+                  style={{ width: `${data.overview.roleDistribution.admins.percentage}%` }}
                 ></div>
               </div>
-              <span className="text-sm text-gray-500">{data.roleDistribution.admin}</span>
+              <span className="text-sm text-gray-500">
+                {data.overview.roleDistribution.admins.count} ({data.overview.roleDistribution.admins.percentage}%)
+              </span>
             </div>
           </div>
         </div>
       </div>
 
-      {/* Placeholder for future charts */}
+      {/* Recent Activity */}
       <div className="bg-white shadow rounded-lg p-6">
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Usage Trends</h3>
-        <div className="h-64 flex items-center justify-center text-gray-500">
-          <div className="text-center">
-            <ChartBarIcon className="h-12 w-12 mx-auto mb-2 text-gray-400" />
-            <p>Chart visualization coming soon</p>
-          </div>
+        <h3 className="text-lg font-medium text-gray-900 mb-4">Recent Activity</h3>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">User</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Action</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {data.recentActivity.map((activity) => (
+                <tr key={activity.id}>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{activity.username}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{activity.email}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{activity.role}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{activity.action}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    {new Date(activity.timestamp).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
