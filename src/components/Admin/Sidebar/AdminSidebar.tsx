@@ -1,6 +1,4 @@
 "use client";
-
-import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -22,15 +20,15 @@ const navigation = [
     { name: "Settings", href: "/admin/settings", icon: CogIcon },
 ];
 
-export default function AdminSidebar() {
-    const [sidebarOpen, setSidebarOpen] = useState(false);
+export default function AdminSidebar({ sidebarOpen, setSidebarOpen }: { sidebarOpen: boolean; setSidebarOpen: (v: boolean) => void }) {
     const pathname = usePathname();
 
     return (
         <>
             {/* Mobile sidebar */}
             <div className={`fixed inset-0 z-50 lg:hidden ${sidebarOpen ? 'block' : 'hidden'}`}>
-                <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setSidebarOpen(false)} />
+                {/* lighter overlay so background content is still visible */}
+                <div className="fixed inset-0 bg-black bg-opacity-20" onClick={() => setSidebarOpen(false)} />
                 <div className="fixed inset-y-0 left-0 flex w-64 flex-col bg-white">
                     <div className="flex h-16 items-center justify-between px-4">
                         <h1 className="text-xl font-bold text-gray-900">Admin Panel</h1>
@@ -53,6 +51,7 @@ export default function AdminSidebar() {
                                         ? 'bg-emerald-100 text-emerald-900'
                                         : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                                         }`}
+                                    onClick={() => setSidebarOpen(false)}
                                 >
                                     <item.icon
                                         className={`mr-3 h-5 w-5 flex-shrink-0 ${isActive ? 'text-emerald-500' : 'text-gray-400 group-hover:text-gray-500'

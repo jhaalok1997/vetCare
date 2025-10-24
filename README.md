@@ -50,6 +50,9 @@
 - **Password Reset**: Email-based password recovery system
 - **Session Management**: Secure MongoDB-based session handling
 - **Multi-tenant Support**: Tenant-based user isolation
+- **Persistent Authentication**: Local storage user data persistence with secure handling
+- **Smart Layout Control**: Dynamic UI elements based on user roles
+- **Auto-logout Cleanup**: Comprehensive cleanup of user data on logout
 
 ### 💻 Modern User Interface
 - **Responsive Design**: Mobile-first approach with desktop optimization
@@ -57,12 +60,18 @@
 - **Interactive Components**: Built with shadcn/ui components
 - **Real-time Chat Interface**: Smooth, responsive chat experience
 - **Accessibility**: WCAG 2.1 compliant design
+- **Adaptive Layout System**: Intelligent component hiding based on user role
+- **Role-Specific UI Elements**: Customized navigation and footer for different user types
+- **Clean Authentication Flow**: Streamlined login/logout experience with proper state management
 
 ### 📊 User Management
 - **User Profiles**: Comprehensive user profile management
 - **Contact Management**: Track user interactions and inquiries
 - **Activity Logging**: Detailed user activity tracking
 - **Data Analytics**: User engagement and usage analytics
+- **Enhanced Session Management**: Improved user session persistence
+- **Role Verification**: Robust admin authentication checks
+- **Header-based Authentication**: Secure x-user header implementation
 
 ---
 
@@ -104,7 +113,7 @@
 ## 🛠 Tech Stack
 
 ### Frontend
-- **Framework**: Next.js 14 (App Router)
+- **Framework**: Next.js 15 (App Router)
 - **Language**: TypeScript 5.0
 - **Styling**: Tailwind CSS 3.0
 - **Components**: shadcn/ui
@@ -113,11 +122,11 @@
 - **Icons**: Lucide React
 
 ### Backend
-- **Runtime**: Node.js 18+
+- **Runtime**: Node.js 22.18.0
 - **API**: Next.js API Routes
 - **Database**: MongoDB Atlas
 - **Authentication**: JWT + bcrypt
-- **Caching**: Node-Cache
+- **Caching**: Redis (cache Storage)
 - **Email**: NodeMailer
 
 ### AI & Search

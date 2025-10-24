@@ -14,10 +14,11 @@ interface User {
 
 interface AdminHeaderProps {
     user: User | null;
+    toggleSidebar: () => void;
 }
 
-export default function AdminHeader({ user }: AdminHeaderProps) {
-    const [isOpen, setIsOpen] = useState(false);
+export default function AdminHeader({ user, toggleSidebar }: AdminHeaderProps) {
+    const [isOpen, setIsOpen] = useState(false); // profile dropdown only
     const router = useRouter();
 
     const handleLogout = async () => {
@@ -26,7 +27,7 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
                 method: "POST",
             });
             if (res.ok) {
-                try { localStorage.removeItem('user'); } catch {}
+                try { localStorage.removeItem('user'); } catch { }
                 router.push("/login");
             }
         } catch (error) {
@@ -36,20 +37,21 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
 
     return (
         <header className="bg-white shadow-sm border-b border-gray-200">
-            <div className="flex h-16 items-center justify-between px-4 sm:px-6 lg:px-8">
+            <div className="flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center">
                     <button
                         type="button"
                         className="text-gray-500 hover:text-gray-600 lg:hidden"
-                        onClick={() => setIsOpen(!isOpen)}
+                        onClick={toggleSidebar}
                     >
                         <Bars3Icon className="h-6 w-6" />
                     </button>
-                    <div className="ml-4 lg:ml-0">
-                        <h2 className="text-lg font-semibold text-gray-900">
-                            Welcome back, {user ? user.username : "Admin"}
+                    <div className="mx-6 lg:ml-0">
+                        <h2 className="text-lg font-extrabold lg:text-2xl lg:font-semibold text-gray-900">
+                            Welcome back ,
+                            <span className="text-sm font-bold bg-blue-500 p-2 rounded-xl"> {user ? user.username : "Admin"}</span>
                         </h2>
-                        <p className="text-sm text-gray-500">Admin Dashboard</p>
+                        <p className="text-sm mt-3 font-bold lg:text-lg text-gray-700">Admin Dashboard</p>
                     </div>
                 </div>
 
@@ -77,7 +79,7 @@ export default function AdminHeader({ user }: AdminHeaderProps) {
                             <div className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                 <div className="px-4 py-2 text-sm text-gray-700 border-b border-gray-100">
                                     <p className="font-medium">{user?.username}</p>
-                                    <p className="text-gray-500">{user?.email}</p>
+                                    <p className="text-gray-500 text-xs">{user?.email}</p>
                                     <p className="text-xs text-emerald-600 font-medium">
                                         {user?.role ? user.role.toUpperCase() : ''}
                                     </p>

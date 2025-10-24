@@ -19,6 +19,7 @@ interface AdminLayoutProps {
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
     const [user, setUser] = useState<User | null>(null);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     useEffect(() => {
         const fetchUser = async () => {
@@ -43,9 +44,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     return (
         <AdminAuthWrapper>
             <div className="min-h-screen bg-gray-50">
-                <AdminSidebar />
+                <AdminSidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
                 <div className="lg:pl-64">
-                    <AdminHeader user={user} />
+                    <AdminHeader user={user} toggleSidebar={() => setSidebarOpen(s => !s)} />
                     <main className="py-6">
                         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                             {children}
