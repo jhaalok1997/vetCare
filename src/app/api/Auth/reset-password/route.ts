@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoDb";
-import User from "@/models/User";
+import User from "@/models/AccountUser";
 import bcrypt from "bcryptjs";
 
 export async function POST(req: Request) {
@@ -44,10 +44,8 @@ export async function POST(req: Request) {
     });
   } catch (error: unknown) {
     console.error("Password reset error:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to reset password';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : "Failed to reset password";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
 import { connectDB } from "@/lib/mongoDb";
-import User from "@/models/User";
+import User from "@/models/AccountUser";
 import { JwtPayload } from "jsonwebtoken";
 
 interface UserJwtPayload extends JwtPayload {
@@ -28,7 +28,10 @@ export async function GET(req: Request) {
     try {
       decoded = jwt.verify(token, SECRET) as UserJwtPayload;
     } catch {
-      return NextResponse.json({ error: "Invalid or expired token" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid or expired token" },
+        { status: 401 }
+      );
     }
 
     await connectDB();
@@ -39,18 +42,19 @@ export async function GET(req: Request) {
     }
 
     // ✅ Return complete user info matching token structure
-    return NextResponse.json({ 
-      user: { 
+    return NextResponse.json({
+      user: {
         id: user._id,
-        username: user.username, 
+        username: user.username,
         email: user.email,
         role: user.role,
-        tenantId: user.tenantId
-      } 
+        tenantId: user.tenantId,
+      },
     });
   } catch (error: unknown) {
     console.error("❌ /auth/profile error:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Server error';
+    const errorMessage =
+      error instanceof Error ? error.message : "Server error";
     return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongoDb";
-import User from "@/models/User";
+import User from "@/models/AccountUser";
 
 export async function POST(req: Request) {
   try {
@@ -32,8 +32,8 @@ export async function POST(req: Request) {
       username,
       email,
       password: hashedPassword,
-      role: role || "petOwner",          // default role
-      tenantId: tenantId || email,    // fallback tenantId → could be clinic/org id later
+      role: role || "petOwner", // default role
+      tenantId: tenantId || email, // fallback tenantId → could be clinic/org id later
     });
 
     return NextResponse.json(
@@ -42,10 +42,8 @@ export async function POST(req: Request) {
     );
   } catch (error: unknown) {
     console.error("Signup error:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Something went wrong';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error ? error.message : "Something went wrong";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

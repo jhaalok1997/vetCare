@@ -24,7 +24,7 @@ const UserSchema = new Schema(
     role: {
       type: String,
       enum: ["petOwner", "vet", "admin"], // ✅ allowed roles
-      default: "petOwner",                // ✅ default role
+      default: "petOwner", // ✅ default role
     },
     tenantId: {
       type: String, // or mongoose.Schema.Types.ObjectId if you have an Org model

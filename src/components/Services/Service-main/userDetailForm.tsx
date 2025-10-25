@@ -13,6 +13,7 @@ interface PetOwnerFormData {
     ownerName: string;
     ownerEmail: string;
     ownerPhone: string;
+    countryCode: string;
     petName: string;
     animalType: string;
     diseaseCategory: string;
@@ -53,50 +54,83 @@ export default function UserDetailForm() {
         setSubmitMessage(null);
 
         try {
-            // First, find matching vets
-            const vetMatchRes = await fetch('/api/ServicesAPi/VetProfile', {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+            // 1. Owner info to PatientOwner
+            const ownerRes = await fetch('/api/ServicesAPi/patientOwner', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    animalTypeId: data.animalType,
-                    diseaseCategoryId: data.diseaseCategory
+                    ownerEmail: data.ownerEmail,
+                    countryCode: data.countryCode,
+                    ownerPhone: data.ownerPhone,
+                    preferredContactMethod: data.preferredContactMethod
                 })
             });
-
-            const vetMatchData = await vetMatchRes.json();
-
-            if (vetMatchData.success && vetMatchData.data.length > 0) {
-                // Create vet match log
-                const logRes = await fetch('/api/ServicesAPi/VetMatchLog', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        userId: 'temp-user-id', // Replace with actual user ID from auth
-                        animalType: data.animalType,
-                        diseaseCategory: data.diseaseCategory,
-                        matchedVet: vetMatchData.data[0]._id
-                    })
-                });
-
-                if (logRes.ok) {
+            const ownerResult = await ownerRes.json();
+            if (!ownerRes.ok || !ownerResult.success) {
+                if (ownerResult.isExisting) {
                     setSubmitMessage({
-                        type: 'success',
-                        message: `Form submitted successfully! We found ${vetMatchData.data.length} matching veterinarian(s). You will be contacted soon.`
+                        type: 'error',
+                        message: ownerResult.message
                     });
-                    reset();
-                } else {
-                    throw new Error('Failed to create vet match log');
+                    setIsSubmitting(false);
+                    return;
                 }
-            } else {
-                setSubmitMessage({
-                    type: 'error',
-                    message: 'No matching veterinarians found for your pet\'s condition. Please try again or contact us directly.'
-                });
+                throw new Error(ownerResult.message || 'Owner info failed');
             }
+
+            // 2. Pet info to AnimalType
+            const petRes = await fetch('/api/ServicesAPi/animalCreated', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    petName: data.petName,
+                    animalType: predefinedAnimalTypes.find(a => a._id === data.animalType)?.name,
+                    petAge: data.petAge,
+                    petBreed: data.petBreed
+                })
+            });
+            const petResult = await petRes.json();
+            if (!petRes.ok || !petResult.success) {
+                if (petResult.isExisting) {
+                    setSubmitMessage({
+                        type: 'error',
+                        message: petResult.message
+                    });
+                    setIsSubmitting(false);
+                    return;
+                }
+                throw new Error(petResult.message || 'Pet info failed');
+            }
+
+            // 3. Medical info to DiseaseCategory
+            const diseaseRes = await fetch('/api/ServicesAPi/diseasesCreated', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    DiseaseType: data.diseaseCategory,
+                    UrgencyLevel: data.urgency.charAt(0).toUpperCase() + data.urgency.slice(1),
+                    Symptoms: [data.symptoms],
+                    AdditionalInfo: data.additionalNotes
+                })
+            });
+            const diseaseResult = await diseaseRes.json();
+            if (!diseaseRes.ok || !diseaseResult.success) {
+                if (diseaseResult.isExisting) {
+                    setSubmitMessage({
+                        type: 'error',
+                        message: diseaseResult.message
+                    });
+                    setIsSubmitting(false);
+                    return;
+                }
+                throw new Error(diseaseResult.message || 'Medical info failed');
+            }
+
+            setSubmitMessage({
+                type: 'success',
+                message: 'Form submitted successfully! All data saved.'
+            });
+            reset();
         } catch (error) {
             console.error('Error submitting form:', error);
             setSubmitMessage({
@@ -137,7 +171,7 @@ export default function UserDetailForm() {
                                 <div className="space-y-4">
                                     <h3 className="text-lg font-semibold text-primary border-b pb-2">Owner Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div>
+                                        {/* <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Full Name *
                                             </label>
@@ -150,7 +184,7 @@ export default function UserDetailForm() {
                                             {errors.ownerName && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.ownerName.message}</p>
                                             )}
-                                        </div>
+                                        </div> */}
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Email Address *
@@ -175,18 +209,36 @@ export default function UserDetailForm() {
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Phone Number *
                                             </label>
-                                            <input
-                                                {...register('ownerPhone', {
-                                                    required: 'Phone number is required',
-                                                    pattern: {
-                                                        value: /^[\+]?[1-9][\d]{0,15}$/,
-                                                        message: 'Invalid phone number'
-                                                    }
-                                                })}
-                                                type="tel"
-                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                                                placeholder="Enter your phone number"
-                                            />
+                                            <div className="flex">
+                                                <select
+                                                    {...register('countryCode', { required: 'Country code is required' })}
+                                                    className="px-2 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-gray-50"
+                                                    defaultValue="+91"
+                                                >
+                                                    <option value="+91">+91 (IND)</option>
+                                                    <option value="+1">+1 (USA)</option>
+                                                    <option value="+44">+44 (UK)</option>
+                                                    <option value="+61">+61 (AUS)</option>
+                                                    <option value="+81">+81 (JPN)</option>
+                                                    <option value="+49">+49 (GER)</option>
+                                                    {/* Add more country codes as needed */}
+                                                </select>
+                                                <input
+                                                    {...register('ownerPhone', {
+                                                        required: 'Phone number is required',
+                                                        pattern: {
+                                                            value: /^[1-9][\d]{0,15}$/,
+                                                            message: 'Invalid phone number'
+                                                        }
+                                                    })}
+                                                    type="tel"
+                                                    className="w-full px-3 py-2 border-t border-b border-r border-gray-300 rounded-r-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                    placeholder="Enter your phone number"
+                                                />
+                                            </div>
+                                            {errors.countryCode && (
+                                                <p className="text-red-500 text-sm mt-1">{errors.countryCode.message}</p>
+                                            )}
                                             {errors.ownerPhone && (
                                                 <p className="text-red-500 text-sm mt-1">{errors.ownerPhone.message}</p>
                                             )}
@@ -420,10 +472,10 @@ export default function UserDetailForm() {
                                             {isSubmitting ? (
                                                 <div className="flex items-center">
                                                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                                    Finding Veterinarians...
+                                                    Submitting...
                                                 </div>
                                             ) : (
-                                                'Find Veterinarian'
+                                                'Submit'
                                             )}
                                         </Button>
                                     </div>

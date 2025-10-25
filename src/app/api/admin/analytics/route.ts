@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoDb";
-import User from "@/models/User";
+import User from "@/models/AccountUser";
 
 export async function GET(req: Request) {
   try {
@@ -25,42 +25,43 @@ export async function GET(req: Request) {
 
     // User growth data
     const thisMonthUsers = await User.countDocuments({
-      createdAt: { $gte: startOfThisMonth }
-    });
-    
-    const lastMonthUsers = await User.countDocuments({
-      createdAt: { 
-        $gte: startOfLastMonth, 
-        $lte: endOfLastMonth 
-      }
+      createdAt: { $gte: startOfThisMonth },
     });
 
-    const growth = lastMonthUsers > 0 
-      ? Math.round(((thisMonthUsers - lastMonthUsers) / lastMonthUsers) * 100)
-      : 0;
+    const lastMonthUsers = await User.countDocuments({
+      createdAt: {
+        $gte: startOfLastMonth,
+        $lte: endOfLastMonth,
+      },
+    });
+
+    const growth =
+      lastMonthUsers > 0
+        ? Math.round(((thisMonthUsers - lastMonthUsers) / lastMonthUsers) * 100)
+        : 0;
 
     // Role distribution
     const roleDistribution = {
       petOwner: await User.countDocuments({ role: "petOwner" }),
       vet: await User.countDocuments({ role: "vet" }),
-      admin: await User.countDocuments({ role: "admin" })
+      admin: await User.countDocuments({ role: "admin" }),
     };
 
     // Mock activity stats (in a real app, you'd track this data)
     const activityStats = {
       totalSessions: Math.floor(Math.random() * 1000) + 500,
       averageSessionTime: "12m 34s",
-      peakHours: ["9:00 AM", "2:00 PM", "7:00 PM"]
+      peakHours: ["9:00 AM", "2:00 PM", "7:00 PM"],
     };
 
     return NextResponse.json({
       userGrowth: {
         thisMonth: thisMonthUsers,
         lastMonth: lastMonthUsers,
-        growth
+        growth,
       },
       activityStats,
-      roleDistribution
+      roleDistribution,
     });
   } catch (error) {
     console.error("Analytics fetch error:", error);

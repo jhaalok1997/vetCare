@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoDb";
-import User from "@/models/User";
+import User from "@/models/AccountUser";
 
 export async function GET(req: Request) {
   try {
@@ -23,27 +23,29 @@ export async function GET(req: Request) {
       .sort({ createdAt: -1 });
 
     // Add activity status (simplified - consider user as active if created in last 7 days)
-    const usersWithActivity = users.map(user => ({
+    const usersWithActivity = users.map((user) => ({
       ...user.toObject(),
       lastLogin: user.createdAt, // Using createdAt as lastLogin for now
-      isActive: new Date(user.createdAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+      isActive:
+        new Date(user.createdAt) >
+        new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     }));
 
     // Calculate statistics
     const stats = {
       total: users.length,
-      active: usersWithActivity.filter(u => u.isActive).length,
-      inactive: usersWithActivity.filter(u => !u.isActive).length,
+      active: usersWithActivity.filter((u) => u.isActive).length,
+      inactive: usersWithActivity.filter((u) => !u.isActive).length,
       byRole: {
-        petOwner: users.filter(u => u.role === "petOwner").length,
-        vet: users.filter(u => u.role === "vet").length,
-        admin: users.filter(u => u.role === "admin").length,
-      }
+        petOwner: users.filter((u) => u.role === "petOwner").length,
+        vet: users.filter((u) => u.role === "vet").length,
+        admin: users.filter((u) => u.role === "admin").length,
+      },
     };
 
     return NextResponse.json({
       users: usersWithActivity,
-      stats
+      stats,
     });
   } catch (error) {
     console.error("Users fetch error:", error);

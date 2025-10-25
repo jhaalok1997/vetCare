@@ -1,20 +1,16 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoDb";
-import User from "@/models/User";
+import User from "@/models/AccountUser";
 import crypto from "crypto-js";
-import {transporter} from "@/lib/nodeMailer";
+import { transporter } from "@/lib/nodeMailer";
 import { mailOptions } from "@/lib/nodeMailer";
-
 
 export async function POST(req: Request) {
   try {
     const { email } = await req.json();
 
     if (!email) {
-      return NextResponse.json(
-        { error: "Email is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
     // Connect to MongoDB
@@ -51,10 +47,10 @@ export async function POST(req: Request) {
     });
   } catch (error: unknown) {
     console.error("Password reset error:", error);
-    const errorMessage = error instanceof Error ? error.message : 'Failed to process password reset';
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : "Failed to process password reset";
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
   }
 }

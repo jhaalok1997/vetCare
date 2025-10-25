@@ -13,7 +13,7 @@ export default function ServiceDetailPage() {
         return (
             <div className="max-w-3xl mx-auto px-4 py-12 text-center">
                 <h1 className="text-3xl font-bold text-red-600">Service Not Found</h1>
-                <Link href="/services" className="text-emerald-600 hover:underline mt-4 block">
+                <Link href="/services" className="text-emerald-400 hover:underline mt-4 block">
                     ← Back to Services
                 </Link>
             </div>

@@ -1,10 +1,20 @@
 // models/DiseaseCategory.ts
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const DiseaseCategorySchema = new mongoose.Schema({
-  name: { type: String, required: true }, // e.g., Skin Issues, Reproductive Health
-  animalTypes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'AnimalType' }],
-  description: { type: String },
+  DiseaseType: {
+    type: String,
+    required: true,
+  },
+  UrgencyLevel: {
+    type: String,
+    enum: ["Low", "Medium", "High"],
+    required: true,
+  },
+  Symptoms: { type: [String], required: true },
+  AdditionalInfo: { type: String },
+  createdAt: { type: Date, default: Date.now },
 });
 
-export default mongoose.models.DiseaseCategory || mongoose.model('DiseaseCategory', DiseaseCategorySchema);
+export default mongoose.models.DiseaseCategory ||
+  mongoose.model("DiseaseCategory", DiseaseCategorySchema);

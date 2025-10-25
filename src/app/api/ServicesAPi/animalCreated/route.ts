@@ -1,52 +1,56 @@
-import { NextResponse , NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoDb";
-import AnimalType from '@/models/AnimalType';
+import AnimalCategory from "@/models/AnimalCategory";
 
-interface AnimalTypeData {
-    name: string;
-    icon: string;
-}
-
-// Creating Animal data
-export async function POST(req: NextRequest): Promise<NextResponse> {
-
-  await connectDB();
-
+export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const data: AnimalTypeData = body;
-    const animal = await AnimalType.create(data);
-    return NextResponse.json(
-        { success: true, data: animal },
-        { status: 201 }
-        );
-  } catch (error: unknown) {
-    const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-    return NextResponse.json(
-        { success: false, error: errorMessage },
+    const { petName, animalType, petAge, petBreed } = body;
+
+    if (!petName || !animalType || petAge === undefined || petAge === null) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "petName, animalType and petAge are required",
+        },
         { status: 400 }
-        );
-  }
-}
-
-
-// Fetching Animal Data
-export async function GET() {
+      );
+    }
 
     await connectDB();
-  
-    try {
-        const animals = await AnimalType.find({});
-        return NextResponse.json(
-            { success: true, data: animals },
-            { status: 200 }
-        );
-    } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
-        return NextResponse.json(
-            { success: false, error: errorMessage },
-            { status: 500 }
-        );
+
+    const ageNum = typeof petAge === "string" ? parseInt(petAge, 10) : petAge;
+
+    // Check for existing pet with same name and type
+    const existingPet = await AnimalCategory.findOne({
+      petName: petName,
+      animalType: animalType,
+    });
+
+    if (existingPet) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Pet with this name and type already exists",
+          isExisting: true,
+        },
+        { status: 409 }
+      );
     }
+
+    const pet = await AnimalCategory.create({
+      petName,
+      animalType,
+      petAge: ageNum,
+      petBreed,
+    });
+
+    return NextResponse.json({ success: true, data: pet }, { status: 201 });
+  } catch (error) {
+    console.error("Error creating pet:", error);
+    return NextResponse.json(
+      { success: false, message: "Server error" },
+      { status: 500 }
+    );
+  }
 }
-  

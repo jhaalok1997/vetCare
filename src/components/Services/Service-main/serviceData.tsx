@@ -77,7 +77,7 @@ export const services = [
       "Nutritional guidance for pets & livestock",
     ],
     colorPalette: {
-      primary: "emerald-600",
+      primary: "white",
       secondary: "emerald-100",
     },
     cta: "Schedule a General Care Visit",
