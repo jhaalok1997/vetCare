@@ -9,6 +9,7 @@ export async function POST(req: Request) {
     const {
       DiseaseType,
       UrgencyLevel: rawUrgencyLevel,
+      Duration,
       Symptoms,
       AdditionalInfo,
     } = body;
@@ -16,6 +17,7 @@ export async function POST(req: Request) {
     if (
       !DiseaseType ||
       !rawUrgencyLevel ||
+      !Duration ||
       !Symptoms ||
       !Array.isArray(Symptoms) ||
       Symptoms.length === 0
@@ -24,7 +26,7 @@ export async function POST(req: Request) {
         {
           success: false,
           message:
-            "DiseaseType, UrgencyLevel, and Symptoms (array) are required",
+            "DiseaseType, UrgencyLevel, Duration, and Symptoms (array) are required",
         },
         { status: 400 }
       );
@@ -64,9 +66,21 @@ export async function POST(req: Request) {
       );
     }
 
+    // Validate Duration is a positive number
+    if (typeof Duration !== "number" || Duration <= 0) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: "Duration must be a positive number",
+        },
+        { status: 400 }
+      );
+    }
+
     const diseaseCategory = await DiseaseCategory.create({
       DiseaseType,
       UrgencyLevel,
+      Duration,
       Symptoms,
       AdditionalInfo,
     });

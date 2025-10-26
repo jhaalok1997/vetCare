@@ -19,6 +19,7 @@ interface PetOwnerFormData {
     diseaseCategory: string;
     petAge: number;
     petBreed?: string;
+    duration: number;
     symptoms: string;
     urgency: 'low' | 'medium' | 'high';
     preferredContactMethod: 'phone' | 'email' | 'both';
@@ -109,6 +110,7 @@ export default function UserDetailForm() {
                 body: JSON.stringify({
                     DiseaseType: data.diseaseCategory,
                     UrgencyLevel: data.urgency.charAt(0).toUpperCase() + data.urgency.slice(1),
+                    Duration: data.duration,
                     Symptoms: [data.symptoms],
                     AdditionalInfo: data.additionalNotes
                 })
@@ -338,6 +340,26 @@ export default function UserDetailForm() {
                                 <div className="space-y-4">
                                     <h3 className="text-lg font-semibold text-primary border-b pb-2">Medical Information</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                                                Duration (in Days) *
+                                            </label>
+                                            <input
+                                                {...register('duration', {
+                                                    required: 'Duration is required',
+                                                    min: { value: 0, message: 'Duration must be 0 or greater' },
+                                                    max: { value: 30, message: 'Duration must be 30 or less' }
+                                                })}
+                                                type="number"
+                                                min="0"
+                                                max="30"
+                                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                                placeholder="Duration in days"
+                                            />
+                                            {errors.duration && (
+                                                <p className="text-red-500 text-sm mt-1">{errors.duration.message}</p>
+                                            )}
+                                        </div>
                                         <div>
                                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                                 Disease/Condition Category *
