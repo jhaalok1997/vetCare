@@ -21,23 +21,6 @@ export async function POST(req: Request) {
 
     const ageNum = typeof petAge === "string" ? parseInt(petAge, 10) : petAge;
 
-    // Check for existing pet with same name and type
-    const existingPet = await AnimalCategory.findOne({
-      petName: petName,
-      animalType: animalType,
-    });
-
-    if (existingPet) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Pet with this name and type already exists",
-          isExisting: true,
-        },
-        { status: 409 }
-      );
-    }
-
     const pet = await AnimalCategory.create({
       petName,
       animalType,

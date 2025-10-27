@@ -6,6 +6,8 @@ import DiseaseCategory from "@/models/DiseasesCategory";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
+    console.log('Received request body:', body);
+    
     const {
       DiseaseType,
       UrgencyLevel: rawUrgencyLevel,
@@ -14,20 +16,40 @@ export async function POST(req: Request) {
       AdditionalInfo,
     } = body;
 
-    if (
-      !DiseaseType ||
-      !rawUrgencyLevel ||
-      !Duration ||
-      !Symptoms ||
-      !Array.isArray(Symptoms) ||
-      Symptoms.length === 0
-    ) {
+    // Detailed validation logging
+    if (!DiseaseType) {
       return NextResponse.json(
-        {
-          success: false,
-          message:
-            "DiseaseType, UrgencyLevel, Duration, and Symptoms (array) are required",
-        },
+        { success: false, message: "DiseaseType is required" },
+        { status: 400 }
+      );
+    }
+    if (!rawUrgencyLevel) {
+      return NextResponse.json(
+        { success: false, message: "UrgencyLevel is required" },
+        { status: 400 }
+      );
+    }
+    if (!Duration) {
+      return NextResponse.json(
+        { success: false, message: "Duration is required" },
+        { status: 400 }
+      );
+    }
+    if (!Symptoms) {
+      return NextResponse.json(
+        { success: false, message: "Symptoms array is required" },
+        { status: 400 }
+      );
+    }
+    if (!Array.isArray(Symptoms)) {
+      return NextResponse.json(
+        { success: false, message: "Symptoms must be an array" },
+        { status: 400 }
+      );
+    }
+    if (Symptoms.length === 0) {
+      return NextResponse.json(
+        { success: false, message: "Symptoms array cannot be empty" },
         { status: 400 }
       );
     }
@@ -48,23 +70,6 @@ export async function POST(req: Request) {
     }
 
     await connectDB();
-
-    // Check for existing disease record with same type and symptoms
-    const existingDisease = await DiseaseCategory.findOne({
-      DiseaseType: DiseaseType,
-      Symptoms: { $all: Symptoms },
-    });
-
-    if (existingDisease) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "A similar disease case already exists with these symptoms",
-          isExisting: true,
-        },
-        { status: 409 }
-      );
-    }
 
     // Validate Duration is a positive number
     if (typeof Duration !== "number" || Duration <= 0) {

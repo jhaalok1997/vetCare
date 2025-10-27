@@ -17,24 +17,24 @@ export async function POST(req: Request) {
 
     await connectDB();
 
-    // Check for existing owner with same email or phone
-    const existingOwner = await PatientOwner.findOne({
-      $or: [
-        { ownerEmail: ownerEmail },
-        { ownerPhone: ownerPhone, countryCode: countryCode },
-      ],
-    });
+   // Check for existing owner with same email or phone
+    // const existingOwner = await PatientOwner.findOne({
+    //   $or: [
+    //     { ownerEmail: ownerEmail },
+    //     { ownerPhone: ownerPhone, countryCode: countryCode },
+    //   ],
+    // });
 
-    if (existingOwner) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: "Owner with this email or phone number already exists",
-          isExisting: true,
-        },
-        { status: 409 }
-      );
-    }
+    // if (existingOwner) {
+    //   return NextResponse.json(
+    //     {
+    //       success: false,
+    //       message: "Owner with this email or phone number already exists",
+    //       isExisting: true,
+    //     },
+    //     { status: 409 }
+    //   );
+    // }
 
     const patientOwner = await PatientOwner.create({
       ownerEmail,

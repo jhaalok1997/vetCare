@@ -110,9 +110,9 @@ export default function UserDetailForm() {
                 body: JSON.stringify({
                     DiseaseType: data.diseaseCategory,
                     UrgencyLevel: data.urgency.charAt(0).toUpperCase() + data.urgency.slice(1),
-                    Duration: data.duration,
-                    Symptoms: [data.symptoms],
-                    AdditionalInfo: data.additionalNotes
+                    Duration: Number(data.duration),
+                    Symptoms: data.symptoms.split(',').map(s => s.trim()),
+                    AdditionalInfo: data.additionalNotes || ''
                 })
             });
             const diseaseResult = await diseaseRes.json();
