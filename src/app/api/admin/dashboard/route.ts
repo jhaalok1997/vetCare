@@ -115,6 +115,28 @@ export async function GET(req: Request) {
       },
     };
 
+    // Get user growth data for the last 7 days
+    const growthData = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(Date.now() - i * 24 * 60 * 60 * 1000);
+      const nextDate = new Date(date.getTime() + 24 * 60 * 60 * 1000);
+      const count = await User.countDocuments({
+        createdAt: { $gte: date, $lt: nextDate },
+      });
+      growthData.push({
+        date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        count,
+      });
+    }
+
+    // Calculate growth percentage
+    const lastWeekUsers = await User.countDocuments({
+      createdAt: { $lt: sevenDaysAgo },
+    });
+    const growthPercentage = lastWeekUsers > 0 
+      ? (((totalUsers - lastWeekUsers) / lastWeekUsers) * 100).toFixed(1)
+      : 0;
+
     return NextResponse.json({
       overview: {
         totalUsers,
@@ -138,6 +160,8 @@ export async function GET(req: Request) {
         },
       },
       recentActivity,
+      growthData,
+      growthPercentage,
     });
   } catch (error) {
     console.error("Dashboard data fetch error:", error);

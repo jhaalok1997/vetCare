@@ -11,7 +11,138 @@ import {
     Quote,
 } from "lucide-react";
 import { motion, useAnimation } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+// Default testimonials at module scope to avoid hook deps
+const defaultTestimonials: Array<{ name: string; role: string; feedback: string }> = [
+    {
+        name: "Dr. Meera Sharma",
+        role: "Veterinary Surgeon",
+        feedback:
+            "Vet🐾Care's predictive analytics helped me anticipate seasonal disease outbreaks. It's like having an AI-powered colleague by my side.",
+    },
+    {
+        name: "Akash Jha",
+        role: "B.V.Sc. Student, BHU",
+        feedback:
+            "The AI-driven quizzes and clinical simulations made my study routine engaging. I feel more confident preparing for exams.",
+    },
+    {
+        name: "Priya Nair",
+        role: "Pet Parent, Bangalore",
+        feedback:
+            "The early symptom checker guided me to the vet at the right time. My lab recovered faster thanks to timely care tips.",
+    },
+    {
+        name: "Dr. Arjun Malhotra",
+        role: "Livestock Consultant",
+        feedback:
+            "Analytics on herd vaccination schedules reduced disease incidents on our farm. Exceptional decision-support for field vets.",
+    },
+    {
+        name: "Sana Qureshi",
+        role: "Final-year Vet Student",
+        feedback:
+            "Flashcards and case-based MCQs match our syllabus perfectly. It feels like a smart study buddy that never gets tired.",
+    },
+    {
+        name: "Rahul Verma",
+        role: "Clinic Manager",
+        feedback:
+            "Our case documentation improved with structured notes and AI summaries. The team collaborates better and faster now.",
+    },
+    {
+        name: "Dr. Kavita Joshi",
+        role: "Wildlife Veterinarian",
+        feedback:
+            "Zoonotic risk mapping is a standout feature. It adds real-world context to wildlife rescue and rehab decisions.",
+    },
+    {
+        name: "Abhishek Singh",
+        role: "Pet Owner, Delhi",
+        feedback:
+            "Nutrition guidance was practical and easy to follow. My indie dog's coat and energy improved in two weeks.",
+    },
+    {
+        name: "Neha Gupta",
+        role: "Veterinary Intern",
+        feedback:
+            "Clinical simulations gave me confidence before rotations. The feedback is specific, not generic—huge plus!",
+    },
+    {
+        name: "Dr. Rohan Deshpande",
+        role: "Small Animal Practitioner",
+        feedback:
+            "Drug interaction checks saved a complex case. The knowledge graph makes cross-referencing quick and reliable.",
+    },
+    {
+        name: "Ishita Kapoor",
+        role: "B.Tech Bioinformatics",
+        feedback:
+            "Loved the clean UI and the way insights are explained. Makes advanced concepts approachable for non-vets too.",
+    },
+    {
+        name: "Mohit Yadav",
+        role: "Dairy Farm Owner",
+        feedback:
+            "Heat stress alerts and hydration tips cut summer losses. It paid for itself in one season.",
+    },
+    {
+        name: "Dr. Ananya Rao",
+        role: "Equine Specialist",
+        feedback:
+            "The differential diagnosis flow is practical and time-saving. It mirrors the way clinicians actually think.",
+    },
+    {
+        name: "Karan Patel",
+        role: "First-time Pet Parent",
+        feedback:
+            "Onboarding was smooth and the guidance was reassuring. Perfect for new pet parents who want to do things right.",
+    },
+    {
+        name: "Simran Kaur",
+        role: "Vet Prep Aspirant",
+        feedback:
+            "Daily micro-lessons helped me build consistency. Short, crisp, and relevant—exactly what I needed.",
+    },
+    {
+        name: "Dr. Vivek Menon",
+        role: "Public Health Veterinarian",
+        feedback:
+            "The focus on One Health is refreshing. It connects animal, human, and environmental health in a meaningful way.",
+    },
+];
+
+const MIN_UNIQUE_TESTIMONIALS = 12;
+
+function buildTestimonials(
+    apiData: Array<{ name: string; role: string; feedback: string }>
+): Array<{ name: string; role: string; feedback: string }> {
+    const pool = [...apiData, ...defaultTestimonials];
+    const seen = new Set<string>();
+    const unique: Array<{ name: string; role: string; feedback: string }> = [];
+    for (const t of pool) {
+        const key = `${t.name}|${t.feedback}`.trim();
+        if (!seen.has(key) && t.name && t.feedback) {
+            seen.add(key);
+            unique.push(t);
+        }
+    }
+    const filled: Array<{ name: string; role: string; feedback: string }> = [...unique];
+    let i = 0;
+    while (filled.length < MIN_UNIQUE_TESTIMONIALS && i < defaultTestimonials.length * 2) {
+        const candidate = defaultTestimonials[i % defaultTestimonials.length];
+        const key = `${candidate.name}|${candidate.feedback}`;
+        if (!seen.has(key)) {
+            seen.add(key);
+            filled.push(candidate);
+        }
+        i++;
+    }
+    return filled;
+}
+
+//
 
 export default function AboutPage() {
     const features = [
@@ -47,38 +178,49 @@ export default function AboutPage() {
         },
     ];
 
-    const testimonials = [
-        {
-            name: "Dr. Meera Sharma",
-            role: "Veterinary Surgeon",
-            feedback:
-                "Vet🐾Care’s predictive analytics helped me anticipate seasonal disease outbreaks. It’s like having an AI-powered colleague by my side.",
-        },
-        {
-            name: "Akash Jha",
-            role: "B.V.Sc. Student, BHU",
-            feedback:
-                "The AI-driven quizzes and clinical simulations made my study routine engaging. I feel more confident preparing for exams and real cases.",
-        },
-        {
-            name: "Neha Gupta",
-            role: "Pet Owner",
-            feedback:
-                "I used the symptom checker for my Labrador, and the guidance was spot-on. It gave me peace of mind before visiting the vet🐾Care.",
-        },
-        {
-            name: "Prof. R.K. Mishra",
-            role: "Veterinary Researcher",
-            feedback:
-                "The ontology-driven knowledge graph is a goldmine for comparative studies in veterinary pharmacology.",
-        },
-    ];
+    // State for testimonials
+    const [testimonials, setTestimonials] = useState<Array<{ name: string; role: string; feedback: string }>>([]);
+    const [isLoadingTestimonials, setIsLoadingTestimonials] = useState(true);
 
-    // Duplicate testimonials for infinite scroll
-    const items = [...testimonials, ...testimonials, ...testimonials];
+    // Fetch testimonials from API
+    useEffect(() => {
+        const fetchTestimonials = async () => {
+            try {
+                setIsLoadingTestimonials(true);
+                const response = await fetch("/api/testimonials");
+                const data = await response.json();
+                setTestimonials(buildTestimonials(data));
+            } catch (error) {
+                console.error("Failed to fetch testimonials:", error);
+                setTestimonials(buildTestimonials([]));
+            } finally {
+                setIsLoadingTestimonials(false);
+            }
+        };
+
+        fetchTestimonials();
+    }, []);
+
+    // Build a seamless marquee track: ensure enough items and duplicate once for looping
+    const baseItems = testimonials;
+    const marqueeItems = [...baseItems, ...baseItems];
 
     const controls = useAnimation();
     const [isPaused, setIsPaused] = useState(false);
+
+    // Start animation when testimonials are loaded
+    useEffect(() => {
+        if (testimonials.length > 0) {
+            controls.start({
+                x: ["0%", "-100%"],
+                transition: {
+                    repeat: Infinity,
+                    duration: 120,
+                    ease: "linear",
+                },
+            });
+        }
+    }, [testimonials, controls]);
 
     const handleHoverStart = async () => {
         if (!isPaused) {
@@ -94,7 +236,7 @@ export default function AboutPage() {
                 x: ["0%", "-100%"],
                 transition: {
                     repeat: Infinity,
-                    duration: 30,
+                    duration: 120,
                     ease: "linear",
                 },
             });
@@ -143,7 +285,7 @@ export default function AboutPage() {
                     </p>
 
                     <a
-                       // href="/ask-vet-ai"
+                        // href="/ask-vet-ai"
                         className="inline-block bg-black text-green-700 font-semibold px-4 py-2 rounded-xl shadow hover:bg-gray-100 transition"
                     >
                         <AskVetAI />
@@ -160,29 +302,38 @@ export default function AboutPage() {
                     What People Say About <span className="text-green-600">Vet🐾Care</span>
                 </h2>
 
-                <div className="relative flex overflow-hidden">
-                    <motion.div
-                        className="flex gap-6"
-                        animate={controls}
-                        initial={{ x: "0%" }}
-                    >
-                        {items.map((t, i) => (
-                            <div
-                                key={i}
-                                onMouseEnter={handleHoverStart}
-                                onMouseLeave={handleHoverEnd}
-                                className="min-w-[300px] max-w-sm p-6 bg-white rounded-2xl shadow-md hover:shadow-xl transition cursor-pointer"
-                            >
-                                <Quote className="w-8 h-8 text-green-600 mb-3" />
-                                <p className="text-gray-700 italic mb-4">“{t.feedback}”</p>
-                                <div>
-                                    <p className="font-semibold text-green-700">{t.name}</p>
-                                    <p className="text-sm text-gray-500">{t.role}</p>
+                {isLoadingTestimonials ? (
+                    <div className="flex justify-center items-center py-20">
+                        <div className="flex flex-col items-center gap-4">
+                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
+                            <p className="text-gray-600">Loading testimonials...</p>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="relative flex overflow-hidden">
+                        <motion.div
+                            className="flex gap-6"
+                            animate={controls}
+                            initial={{ x: "0%" }}
+                        >
+                            {marqueeItems.map((t, i) => (
+                                <div
+                                    key={i}
+                                    onMouseEnter={handleHoverStart}
+                                    onMouseLeave={handleHoverEnd}
+                                    className="min-w-[300px] max-w-sm p-6 bg-white rounded-2xl shadow-md hover:shadow-xl transition cursor-pointer border-2 border-green-300"
+                                >
+                                    <Quote className="w-8 h-8 text-green-600 mb-3" />
+                                    <p className="text-gray-700 italic mb-4">&ldquo;{t.feedback}&rdquo;</p>
+                                    <div>
+                                        <p className="font-semibold text-green-700">{t.name}</p>
+                                        <p className="text-sm text-gray-500">{t.role}</p>
+                                    </div>
                                 </div>
-                            </div>
-                        ))}
-                    </motion.div>
-                </div>
+                            ))}
+                        </motion.div>
+                    </div>
+                )}
             </section>
         </>
     );

@@ -43,6 +43,13 @@
 - **Conversation History**: Maintains context-aware chat history per user
 - **Domain-Specific Responses**: Focused on veterinary and animal health topics
 - **Multi-language Support**: Support for multiple languages in AI responses
+- **AI Diagnosis Report Generator**: Intelligent diagnosis reports based on pet symptoms and medical history
+  - Analyzes pet information (animal type, age, breed, symptoms)
+  - Provides possible diseases with descriptions (max 3)
+  - Suggests immediate home care advice
+  - Recommends when to seek urgent veterinary care
+  - Generates downloadable PDF reports
+  - Saves diagnosis history to MongoDB
 
 ### 🔐 Advanced Authentication & Authorization
 - **Role-Based Access Control (RBAC)**: Admin, Veterinarian, and Pet Owner roles
@@ -94,6 +101,14 @@
 - **Appointment Scheduling**: Online booking system (coming soon)
 - **Health Records**: Digital pet health records (coming soon)
 - **Emergency Services**: 24/7 emergency contact information
+- **Pet Health Assessment Form**: Comprehensive form for pet diagnosis
+  - Owner information (email, phone, contact preferences)
+  - Pet details (name, type, age, breed)
+  - Medical information (disease category, urgency level, symptoms, duration)
+  - Dynamic disease categories based on animal type
+  - Animal-specific health information and guidance
+  - Real-time form validation
+  - Integrated with AI diagnosis engine
 
 ### 🔒 Security Enhancements
 - **Input Validation**: Comprehensive input sanitization
@@ -130,10 +145,12 @@
 - **Email**: NodeMailer
 
 ### AI & Search
-- **LLM**: Groq (llama-3.1-8b-instant)
+- **LLM**: Groq (llama-3.3-70b-versatile)
 - **Web Search**: Tavily API
 - **Response Format**: Markdown with structured data
 - **Context Management**: Conversation history
+- **Diagnosis Engine**: LangChain + Groq for medical analysis
+- **PDF Generation**: jsPDF for downloadable reports
 
 ### Development Tools
 - **Linting**: ESLint
@@ -243,6 +260,49 @@ interface ContactedUser {
   phone?: string;
   createdAt: Date;
 }
+
+// DiagnosisReport Model
+interface DiagnosisReport {
+  _id: ObjectId;
+  animalType: string;
+  petAge: number;
+  symptoms: string;
+  urgency: 'low' | 'medium' | 'high';
+  additionalNotes?: string;
+  report: string;
+  createdAt: Date;
+}
+
+// PatientOwner Model
+interface PatientOwner {
+  _id: ObjectId;
+  ownerEmail: string;
+  ownerPhone: string;
+  countryCode: string;
+  preferredContactMethod: 'phone' | 'email' | 'both';
+  createdAt: Date;
+}
+
+// AnimalCategory Model
+interface AnimalCategory {
+  _id: ObjectId;
+  petName: string;
+  animalType: string;
+  petAge: number;
+  petBreed?: string;
+  createdAt: Date;
+}
+
+// DiseasesCategory Model
+interface DiseasesCategory {
+  _id: ObjectId;
+  DiseaseType: string;
+  UrgencyLevel: string;
+  Duration: number;
+  Symptoms: string[];
+  AdditionalInfo: string;
+  createdAt: Date;
+}
 ```
 
 ### API Routes Structure
@@ -257,7 +317,14 @@ interface ContactedUser {
 │   └── reset-password/route.ts
 ├── AskVetcare-button/route.ts
 ├── ContactedUser/route.ts
-└── faqs/route.ts
+├── faqs/route.ts
+├── FormPateintDiagnose/route.ts
+└── ServicesAPi/
+    ├── animalCreated/route.ts
+    ├── diseasesCreated/route.ts
+    ├── patientOwner/route.ts
+    ├── VetMatchLog/route.ts
+    └── VetProfile/route.ts
 ```
 
 ---
@@ -296,11 +363,18 @@ graph TD
 
 ### Groq Integration
 ```typescript
+// Chat Assistant
 const model = new ChatGroq({
   apiKey: process.env.GROQ_API_KEY,
-  model: "llama-3.1-8b-instant",
-  temperature: 0.3,
-  maxTokens: 1000
+  model: "llama-3.3-70b-versatile",
+  temperature: 1,
+});
+
+// Diagnosis Engine
+const model = new ChatGroq({
+  apiKey: process.env.GROQ_API_KEY,
+  model: "llama-3.3-70b-versatile",
+  temperature: 1,
 });
 ```
 
@@ -322,12 +396,27 @@ const searchOptions = {
 ```
 
 ### AI Processing Pipeline
+
+#### Chat Assistant Flow
 1. **Query Validation**: Check if query is veterinary-related
 2. **Current Information Detection**: Identify if query needs recent data
 3. **Tavily Search**: Search for recent veterinary information
 4. **Groq Processing**: Generate AI response using LLM
 5. **Response Formatting**: Format response with markdown
-6. **History Management**: Store conversation history
+6. **History Management**: Store conversation history in Redis
+
+#### Diagnosis Report Flow
+1. **Form Submission**: User submits pet health assessment form
+2. **Data Collection**: Collect owner, pet, and disease information
+3. **Save to MongoDB**: Store patient owner, animal, and disease data
+4. **AI Analysis**: Groq AI analyzes symptoms and pet information
+5. **Report Generation**: Generate structured diagnosis report
+   - Possible diseases (max 3)
+   - Disease descriptions
+   - Home care advice
+   - Urgent care recommendations
+6. **Save Diagnosis**: Store diagnosis report in MongoDB
+7. **PDF Export**: User can download report as PDF
 
 ---
 
@@ -447,27 +536,68 @@ Authenticate user and return JWT token.
 }
 ```
 
-### AI Assistant Endpoint
+### AI Assistant Endpoints
 
 #### POST `/api/AskVetcare-button`
-Get AI-powered veterinary assistance.
+Get AI-powered veterinary assistance with conversation history.
 
 **Request Body:**
 ```json
 {
-  "query": "string",
-  "conversationHistory": "array"
+  "question": "string",
+  "userId": "string"
 }
 ```
 
 **Response:**
 ```json
 {
-  "response": "string",
-  "sources": "array",
-  "timestamp": "string"
+  "answer": "string",
+  "history": [
+    {
+      "role": "user" | "assistant",
+      "content": "string"
+    }
+  ]
 }
 ```
+
+#### POST `/api/FormPateintDiagnose`
+Generate AI-powered diagnosis report for pet health assessment.
+
+**Request Body:**
+```json
+{
+  "ownerEmail": "string",
+  "ownerPhone": "string",
+  "countryCode": "string",
+  "preferredContactMethod": "phone" | "email" | "both",
+  "petName": "string",
+  "animalType": "string",
+  "diseaseCategory": "string",
+  "petAge": "number",
+  "petBreed": "string (optional)",
+  "duration": "number (days)",
+  "symptoms": "string",
+  "urgency": "low" | "medium" | "high",
+  "additionalNotes": "string (optional)"
+}
+```
+
+**Response:**
+```json
+{
+  "report": "string (formatted diagnosis report)"
+}
+```
+
+**Features:**
+- Analyzes pet symptoms using Groq AI (llama-3.3-70b-versatile)
+- Provides possible diseases (max 3) with descriptions
+- Suggests immediate home care advice
+- Recommends when to seek urgent veterinary care
+- Saves diagnosis to MongoDB for record keeping
+- Generates downloadable PDF reports via frontend
 
 ---
 

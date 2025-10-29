@@ -1,4 +1,7 @@
 import FAQ from "@/components/Faqs/faqs";
+import QuickActions from "@/components/Home/QuickActions";
+import MiniChart from "@/components/Home/MiniChart";
+import MiniCalendar from "@/components/Home/MiniCalendar";
 import Image from "next/image";
 
 export default function Home() {
@@ -54,6 +57,11 @@ export default function Home() {
           <p>Get assistance with possible diagnoses based on symptoms and reports.</p>
         </div>
       </section>
+
+      {/* Engagement widgets */}
+      <QuickActions />
+      <MiniChart />
+      <MiniCalendar />
 
       {/* FAQs */}
       <main className="min-h-screen bg-gray-50">

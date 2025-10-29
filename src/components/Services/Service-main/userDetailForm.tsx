@@ -112,7 +112,7 @@ export default function UserDetailForm() {
     const downloadPDF = () => {
         if (!diagnosisReport) return;
         const doc = new jsPDF();
-        doc.text("Veterinary Diagnosis Report", 10, 10);
+        doc.text("VetCare - Diagnosis Report", 10, 10);
         const lines = doc.splitTextToSize(diagnosisReport, 180);
         doc.text(lines, 10, 20);
         doc.save("diagnosis_report.pdf");
@@ -127,16 +127,17 @@ export default function UserDetailForm() {
                 animate={{ rotateY: 0, opacity: 1 }}
                 transition={{ duration: 0.6 }}
             >
-                <h2 className="text-2xl font-bold text-primary mb-4">Vet🐾Care- Diagnosis Report</h2>
+                <h2 className="text-4xl font-bold text-primary mb-4 font-['niconne'] bg-green-800 rounded-xl p-1 pl-4" >Vet🐾Care</h2>
+                <span className="text-xl font-serif font-semibold ml-4">Diagnosis Report</span>
                 <div className="bg-gray-50 border border-gray-200 rounded-md p-4 text-gray-800 whitespace-pre-line leading-relaxed">
                     {diagnosisReport}
                 </div>
 
                 <div className="flex gap-4 mt-6">
-                    <Button onClick={downloadPDF} className="bg-black text-white hover:bg-primary/80">
+                    <Button onClick={downloadPDF} className="bg-black text-white hover:bg-primary/80 hover:bg-gray-600 cursor-pointer">
                         Download PDF
                     </Button>
-                    <Button onClick={() => setDiagnosisReport(null)} className="bg-gray-200 text-black hover:bg-gray-300">
+                    <Button onClick={() => setDiagnosisReport(null)} className="bg-gray-200 text-black hover:bg-gray-700 cursor-pointer">
                         Back to Form
                     </Button>
                 </div>
