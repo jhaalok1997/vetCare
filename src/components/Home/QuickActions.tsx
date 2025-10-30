@@ -4,13 +4,13 @@ import { Button } from "@/components/ui/button"
 
 export default function QuickActions() {
     return (
-        <section className="max-w-7xl mx-auto px-6 py-10">
+        <section className="max-w-full mx-auto px-2 py-5">
             <div className="mb-6">
                 <h3 className="text-2xl font-bold">Quick Actions</h3>
                 <p className="text-gray-600">Get started with the most common tasks</p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
                 <ActionCard
                     title="Book Appointment"
                     description="Schedule a visit with a veterinarian"
@@ -41,7 +41,7 @@ function ActionCard({
     cta: string
 }) {
     return (
-        <div className="rounded-xl border bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
+        <div className="rounded-xl w-90 h-40 border bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
             <h4 className="text-lg font-semibold mb-1">{title}</h4>
             <p className="text-gray-600 mb-4 text-sm">{description}</p>
             <Button className="w-full" size="lg">
