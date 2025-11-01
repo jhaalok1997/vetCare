@@ -60,7 +60,7 @@ async function setUserHistory(userId: string, history: ChatMessage[]) {
   try {
     const client = await getRedisClient();
     await client.set(`chat:${userId}`, JSON.stringify(history), {
-      EX: 60 * 60 * 24 * 7, // 🕓 Expire in 7 days
+      EX: 60 * 60 * 24 * 7, // 🕓 TTL (Time to live )Expire in 7 days
     });
   } catch (err) {
     console.error("⚠️ Redis setUserHistory error:", err);

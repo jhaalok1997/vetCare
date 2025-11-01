@@ -11,7 +11,7 @@ const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY || "");
 async function generateTestimonials() {
   const prompt = `
 Generate exactly 4 testimonials in JSON format with keys "name", "role", and "feedback".
-Each testimonial should be authentic, diverse, and reflect real experiences from different perspectives.
+Each testimonial should be authentic,Looks human , Authentic , Natural ,Genuine ,Realistic  diverse, and reflect real experiences from different perspectives.
 
 The testimonials should be from:
 1. A veterinary surgeon/doctor
@@ -31,6 +31,7 @@ Guidelines:
   * Symptom checkers
   * Clinical simulations
 - Keep feedback concise (1-2 sentences, max 150 characters)
+- Looks human , Authentic , Natural ,Genuine ,Realistic 
 - Make it sound natural and genuine
 - Vary the tone - some professional, some casual
 
