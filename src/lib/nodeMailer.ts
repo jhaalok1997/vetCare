@@ -1,7 +1,5 @@
 import nodemailer from "nodemailer";
 
-
-
 // Create SMTP transporter
 export const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -11,13 +9,12 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-
- // Email content
-   export const mailOptions = (email: string, resetUrl: string) => ({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "Password Reset Request - Vet🐾Care ",
-      html: `
+// Email content
+export const mailOptions = (email: string, resetUrl: string) => ({
+  from: process.env.EMAIL_USER,
+  to: email,
+  subject: "Password Reset Request - Vet🐾Care ",
+  html: `
         <h1>Password Reset Request</h1>
         <p>You requested a password reset for your Vet🐾Care account.</p>
         <p>Click the link below to reset your password. This link is valid for 1 hour.</p>
@@ -33,4 +30,4 @@ export const transporter = nodemailer.createTransport({
         <p>If you didn't request this, please ignore this email.</p>
         <p>Best regards,<br>Vet🐾Care Team</p>
       `,
-    });
+});

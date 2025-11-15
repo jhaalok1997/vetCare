@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import { ChatGroq } from "@langchain/groq";
+import { model } from "@/lib/llmModel";
 import { tavily } from "@tavily/core";
-import { createClient } from "redis";
+import { getRedisClient } from "@/lib/redisconfig";
 
 // ---------- Interfaces ----------
 interface TavilySearchResult {
@@ -19,30 +19,7 @@ interface ChatMessage {
   content: string;
 }
 
-// ---------- Redis Connection ----------
-let redis: import("redis").RedisClientType | null = null;
 
-async function getRedisClient() {
-  if (redis && redis.isOpen) return redis;
-
-  redis = createClient({
-    username: process.env.REDIS_USERNAME,
-    password: process.env.REDIS_PASSWORD,
-    socket: {
-      host: process.env.REDIS_HOST,
-      port: Number(process.env.REDIS_PORT),
-    },
-  });
-
-  redis.on("error", (err) => console.error("Redis Client Error:", err));
-
-  if (!redis.isOpen) {
-    await redis.connect();
-    console.log("✅ Connected to Redis Cloud");
-  }
-
-  return redis;
-}
 
 // ---------- Redis Helpers ----------
 async function getUserHistory(userId: string): Promise<ChatMessage[]> {
@@ -90,12 +67,7 @@ function isVetQuery(query: string): boolean {
   return vetKeywords.some((kw) => query.toLowerCase().includes(kw));
 }
 
-// ---------- Groq Model ----------
-const model = new ChatGroq({
-  apiKey: process.env.GROQ_API_KEY || "",
-  model:"llama-3.3-70b-versatile" , // "llama-3.1-8b-instant",
-  temperature: 1,
-});
+
 
 // ---------- Tavily Search ----------
 async function searchTavily(query: string): Promise<TavilySearchResponse> {
