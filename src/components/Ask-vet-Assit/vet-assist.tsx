@@ -105,7 +105,7 @@ export default function AskVetAI() {
   return (
     <section className="relative">
       {/* Toggle Chat Button */}
-      <Button onClick={() => setOpen(!open)} className="text-green-700">
+      <Button onClick={() => setOpen(!open)} className="text-white">
         {open ? "Close Vet🐾Care Assistant" : "Ask Vet🐾Care Assistant"}
       </Button>
 

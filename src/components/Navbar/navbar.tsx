@@ -167,8 +167,9 @@ export default function Navbar() {
           <div className="md:hidden">
             <Sheet open={open} onOpenChange={setOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" className="text-white">
-                  <Menu size={24} />
+                <Button variant="ghost" className="text-black w-20" aria-label="Open navigation menu" >
+                  <Menu size={40} strokeWidth={2} />
+                   
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="bg-emerald-700 text-white">
