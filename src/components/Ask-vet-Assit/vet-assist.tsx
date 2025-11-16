@@ -82,13 +82,13 @@ export default function AskVetAI() {
 
       setQuestion("");
     } catch (error) {
-      console.error("❌ Error asking VetAI:", error);
+      console.error(" Error asking VetAI:", error);
       setMessages((prev) => [
         ...prev,
         {
           role: "assistant",
           content:
-            "⚠️ Sorry, I'm having trouble right now. Please try again shortly.",
+            " Sorry for the trouble right now. Please try again shortly.",
         },
       ]);
     } finally {
@@ -105,7 +105,7 @@ export default function AskVetAI() {
   return (
     <section className="relative">
       {/* Toggle Chat Button */}
-      <Button onClick={() => setOpen(!open)} className="text-white">
+      <Button onClick={() => setOpen(!open)} className="text-white hover:bg-gray-700 cursor-pointer">
         {open ? "Close Vet🐾Care Assistant" : "Ask Vet🐾Care Assistant"}
       </Button>
 

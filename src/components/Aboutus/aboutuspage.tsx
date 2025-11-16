@@ -286,7 +286,7 @@ export default function AboutPage() {
 
                     <a
                         // href="/ask-vet-ai"
-                        className="inline-block bg-black text-green-700 font-semibold px-4 py-2 rounded-xl shadow hover:bg-gray-100 transition"
+                        className="inline-block bg-black text-green-700 font-semibold px-4 py-2 rounded-xl shadow hover:bg-gray-700 transition"
                     >
                         <AskVetAI />
 
@@ -306,7 +306,7 @@ export default function AboutPage() {
                     <div className="flex justify-center items-center py-20">
                         <div className="flex flex-col items-center gap-4">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600"></div>
-                            <p className="text-gray-600">Loading testimonials...</p>
+                            <p className="text-gray-600">Loading Testimonials...</p>
                         </div>
                     </div>
                 ) : (
