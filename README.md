@@ -303,6 +303,42 @@ interface DiseasesCategory {
   AdditionalInfo: string;
   createdAt: Date;
 }
+
+// VetProfile Model
+interface VetProfile {
+  _id: ObjectId;
+  accountUser?: ObjectId;
+  name: string;
+  qualifications?: string;
+  experienceYears?: number;
+  contact: {
+    phone?: string;
+    email?: string;
+    location?: string;
+    teleconsultAvailable: boolean;
+  };
+  animalExpertise: ObjectId[];
+  diseaseExpertise: ObjectId[];
+  tags: string[];
+  rating: number;
+  isActive: boolean;
+}
+
+// VetMatchLog Model
+interface VetMatchLog {
+  _id: ObjectId;
+  userId?: ObjectId;
+  ownerEmail?: string;
+  ownerPhone?: string;
+  animalType: ObjectId;
+  diseaseCategory: ObjectId;
+  matchedVet: ObjectId;
+  appointmentDate: Date;
+  status: "scheduled" | "completed" | "cancelled";
+  notes?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 ```
 
 ### API Routes Structure
@@ -599,13 +635,71 @@ Generate AI-powered diagnosis report for pet health assessment.
 - Saves diagnosis to MongoDB for record keeping
 - Generates downloadable PDF reports via frontend
 
----
+### Veterinarian Dashboard Endpoints
 
-## 📄 License
+#### GET `/api/veterinarian/dashboard`
+Return a consolidated snapshot for the logged-in veterinarian. Requires a valid `auth` cookie with a JWT whose role is `vet`.
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**Response:**
+```json
+{
+  "overview": {
+    "totalPatients": 12,
+    "todaysAppointments": 3,
+    "newConsultations": 5,
+    "unreadMessages": 4
+  },
+  "appointments": [
+    {
+      "id": "logId",
+      "patientName": "Bella",
+      "species": "Dog",
+      "condition": "Dermatitis",
+      "urgency": "High",
+      "scheduledFor": "2025-11-18T13:00:00.000Z",
+      "status": "scheduled"
+    }
+  ],
+  "patients": [
+    {
+      "id": "animalId",
+      "name": "Bella",
+      "species": "Dog",
+      "age": 4,
+      "breed": "Labrador",
+      "lastVisit": "2025-11-17T17:00:00.000Z",
+      "condition": "Dermatitis",
+      "urgency": "High",
+      "latestDiagnosisSnippet": "Possible seasonal dermatitis..."
+    }
+  ],
+  "messages": [
+    {
+      "id": "messageId",
+      "name": "John Doe",
+      "email": "john@example.com",
+      "message": "My dog keeps scratching...",
+      "status": "pending",
+      "receivedAt": "2025-11-18T08:15:00.000Z"
+    }
+  ],
+  "meta": {
+    "vetProfile": {
+      "id": "vetProfileId",
+      "name": "Dr. Emily Carter",
+      "email": "emily@clinic.com"
+    },
+    "totals": {
+      "consultationsTracked": 18
+    }
+  }
+}
+```
 
----
+**Notes:**
+- Counts and collections are scoped to the veterinarian determined from the JWT (`accountUser` reference or contact email fallback).
+- Appointment and patient data are sourced from `VetMatchLog` documents populated with `AnimalCategory`/`DiseaseCategory` relations.
+- Message data prioritizes records assigned to the vet (by `assignedVetId`/`assignedVetEmail`) and gracefully falls back to unassigned inbox items.
 
 ## 👥 Authors
 

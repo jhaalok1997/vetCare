@@ -1,46 +1,113 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tab";
-import { PawPrint, Calendar, Users, MessageSquare } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { DashboardData } from "./types";
+import { DashboardOverviewSection } from "./DashboardOverview";
+import { DashboardAppointmentsSection } from "./DashboardAppointments";
+import { DashboardPatientsSection } from "./DashboardPatients";
+import { DashboardMessagesSection } from "./DashboardMessages";
+
+const numberFormatter = new Intl.NumberFormat();
 
 export default function VetDashboard() {
     const router = useRouter();
-    const [loading, setLoading] = useState(true);
+    const [authLoading, setAuthLoading] = useState(true);
+    const [dataLoading, setDataLoading] = useState(true);
+    const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    const handleLogout = async () => {
+        try {
+            const res = await fetch("/api/Auth/logout", {
+                method: "POST",
+                credentials: "include",
+            });
+            if (res.ok) {
+                try {
+                    localStorage.removeItem("user");
+                } catch {
+                    // ignore
+                }
+                router.push("/login");
+            }
+        } catch (err) {
+            console.error("Logout failed:", err);
+        }
+    };
+
+    const fetchDashboardData = useCallback(async () => {
+        setDataLoading(true);
+        setError(null);
+
+        try {
+            const res = await fetch("/api/veterinarian/dashboard", {
+                credentials: "include",
+            });
+
+            if (!res.ok) {
+                const payload = (await res.json().catch(
+                    () => ({} as { error?: string })
+                )) as { error?: string };
+                throw new Error(payload.error || "Unable to fetch dashboard data.");
+            }
+
+            const payload: DashboardData = await res.json();
+            setDashboardData(payload);
+        } catch (err) {
+            console.error("Dashboard data fetch failed:", err);
+            setError(err instanceof Error ? err.message : "Something went wrong.");
+        } finally {
+            setDataLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
         const checkAuth = async () => {
             try {
                 const res = await fetch("/api/Auth/profile", {
-                    credentials: 'include'  // Add credentials for cookie
+                    credentials: "include",
                 });
-                if (res.ok) {
-                    const data = await res.json();
-                    if (data.user?.role === "admin") {
-                        router.push("/admin");
-                    }else if(data.user?.role ==="vet"){
-                        router.push("/veterinarian/Dashboard")
-                    }
-                     else if (data.user?.role !== "vet") {
-                        router.push("/");
-                    }
-                } else {
+
+                if (!res.ok) {
                     router.push("/login");
+                    return;
                 }
-            } catch (error) {
-                console.error("Auth check error:", error);
+
+                const data = await res.json();
+
+                if (data.user?.role === "admin") {
+                    router.push("/admin");
+                    return;
+                }
+
+                if (data.user?.role !== "vet") {
+                    router.push("/");
+                    return;
+                }
+
+                await fetchDashboardData();
+            } catch (err) {
+                console.error("Auth check error:", err);
                 router.push("/login");
             } finally {
-                setLoading(false);
+                setAuthLoading(false);
             }
         };
 
         checkAuth();
-    }, [router]);
+    }, [fetchDashboardData, router]);
 
-    if (loading) {
+    const vetName = useMemo(
+        () => dashboardData?.meta?.vetProfile?.name ?? "Veterinarian",
+        [dashboardData]
+    );
+
+    const isVerified = dashboardData?.meta?.vetProfile?.isVerified ?? false;
+
+    if (authLoading || (dataLoading && !dashboardData)) {
         return (
             <div className="flex items-center justify-center h-screen">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
@@ -50,10 +117,37 @@ export default function VetDashboard() {
 
     return (
         <div className="container mx-auto p-6">
-            <h1 className="text-3xl font-bold mb-6">Veterinarian Dashboard</h1>
+            <div className="flex items-start justify-between gap-4 mb-6">
+                <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                        <h1 className="text-3xl font-bold">Welcome back, {vetName}</h1>
+                        {isVerified && (
+                            <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 border border-emerald-200">
+                                Verified
+                            </span>
+                        )}
+                    </div>
+                    {dashboardData?.meta?.totals?.consultationsTracked !== undefined && (
+                        <p className="text-sm text-muted-foreground">
+                            Tracking {numberFormatter.format(dashboardData.meta.totals.consultationsTracked)} total consultations across your practice.
+                        </p>
+                    )}
+                    {error && (
+                        <div className="flex items-center gap-3 text-sm text-red-600">
+                            <span>{error}</span>
+                            <Button variant="outline" size="sm" onClick={fetchDashboardData} disabled={dataLoading}>
+                                Retry
+                            </Button>
+                        </div>
+                    )}
+                </div>
+                <Button variant="outline" onClick={handleLogout}>
+                    Logout
+                </Button>
+            </div>
 
             <Tabs defaultValue="overview" className="w-full">
-                <TabsList className="mb-4">
+                <TabsList className="mb-4 flex flex-wrap">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
                     <TabsTrigger value="appointments">Appointments</TabsTrigger>
                     <TabsTrigger value="patients">Patients</TabsTrigger>
@@ -61,73 +155,26 @@ export default function VetDashboard() {
                 </TabsList>
 
                 <TabsContent value="overview">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium">Total Patients</CardTitle>
-                                <PawPrint className="h-4 w-4 text-emerald-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">24</div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium">Todays Appointments</CardTitle>
-                                <Calendar className="h-4 w-4 text-emerald-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">3</div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium">New Consultations</CardTitle>
-                                <Users className="h-4 w-4 text-emerald-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">7</div>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between pb-2">
-                                <CardTitle className="text-sm font-medium">Unread Messages</CardTitle>
-                                <MessageSquare className="h-4 w-4 text-emerald-600" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">5</div>
-                            </CardContent>
-                        </Card>
-                    </div>
-
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-semibold mb-4">Recent Activity</h2>
-                        <p className="text-gray-500">Welcome to your veterinarian dashboard. Here you can manage your appointments, patient records, and communications.</p>
-                    </div>
+                    <DashboardOverviewSection overview={dashboardData?.overview} />
                 </TabsContent>
 
                 <TabsContent value="appointments">
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-semibold mb-4">Upcoming Appointments</h2>
-                        <p className="text-gray-500">Your appointment schedule will appear here.</p>
-                    </div>
+                    <DashboardAppointmentsSection
+                        appointments={dashboardData?.appointments}
+                        isLoading={dataLoading}
+                    />
                 </TabsContent>
 
                 <TabsContent value="patients">
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-semibold mb-4">Patient Records</h2>
-                        <p className="text-gray-500">Your patient records will appear here.</p>
-                    </div>
+                    <DashboardPatientsSection patients={dashboardData?.patients} />
                 </TabsContent>
 
                 <TabsContent value="messages">
-                    <div className="bg-white p-6 rounded-lg shadow">
-                        <h2 className="text-xl font-semibold mb-4">Messages</h2>
-                        <p className="text-gray-500">Your messages will appear here.</p>
-                    </div>
+                    <DashboardMessagesSection
+                        messages={dashboardData?.messages}
+                        isLoading={dataLoading}
+                        onRefresh={fetchDashboardData}
+                    />
                 </TabsContent>
             </Tabs>
         </div>

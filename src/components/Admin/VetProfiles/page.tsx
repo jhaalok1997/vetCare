@@ -28,9 +28,57 @@ interface VetProfile {
 export default function VetProfilesPage() {
     const [vetProfiles, setVetProfiles] = useState<VetProfile[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null); // page-level (initial load) error
+    const [actionError, setActionError] = useState<string | null>(null); // verify/unverify action errors
     const [searchTerm, setSearchTerm] = useState("");
     const [filterStatus, setFilterStatus] = useState("all");
+    const [updatingVetId, setUpdatingVetId] = useState<string | null>(null);
+
+    const handleToggleVerification = async (vetId: string, currentStatus?: boolean) => {
+        try {
+            const currentUser = localStorage.getItem("user");
+            if (!currentUser) {
+                setActionError("User not authenticated");
+                return;
+            }
+
+            setUpdatingVetId(vetId);
+            setActionError(null);
+
+            const res = await fetch("/api/admin/vets", {
+                method: "PATCH",
+                headers: {
+                    "Content-Type": "application/json",
+                    "x-user": currentUser,
+                },
+                body: JSON.stringify({
+                    vetId,
+                    isVerified: !currentStatus,
+                }),
+            });
+
+            if (!res.ok) {
+                const errorData = await res.json().catch(() => ({}));
+                throw new Error(errorData.error || "Failed to update verification status");
+            }
+
+            // Optimistically update local state
+            setVetProfiles((prev) =>
+                prev.map((vet) =>
+                    vet._id === vetId ? { ...vet, isVerified: !currentStatus } : vet
+                )
+            );
+        } catch (err) {
+            console.error("Failed to update vet verification:", err);
+            setActionError(
+                err instanceof Error
+                    ? err.message
+                    : "An error occurred while updating verification status"
+            );
+        } finally {
+            setUpdatingVetId(null);
+        }
+    };
 
     useEffect(() => {
         const fetchVetProfiles = async () => {
@@ -108,6 +156,11 @@ export default function VetProfilesPage() {
                 <p className="mt-1 text-sm text-gray-500">
                     Manage and monitor registered veterinarians
                 </p>
+                {actionError && (
+                    <p className="mt-2 text-sm text-red-600">
+                        {actionError}
+                    </p>
+                )}
             </div>
 
             {/* Stats Cards */}
@@ -185,6 +238,7 @@ export default function VetProfilesPage() {
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clinic</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
                                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
+                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
                             </tr>
                         </thead>
                         <tbody className="bg-white divide-y divide-gray-200">
@@ -239,6 +293,25 @@ export default function VetProfilesPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                             {new Date(vet.createdAt).toLocaleDateString()}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            <button
+                                                type="button"
+                                                onClick={() => handleToggleVerification(vet._id, vet.isVerified)}
+                                                disabled={updatingVetId === vet._id}
+                                                className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-medium border transition ${vet.isVerified
+                                                    ? "border-red-200 text-red-700 bg-red-50 hover:bg-red-100"
+                                                    : "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                                                    } ${updatingVetId === vet._id ? "opacity-60 cursor-not-allowed" : ""}`}
+                                            >
+                                                {updatingVetId === vet._id ? (
+                                                    <span>Saving...</span>
+                                                ) : vet.isVerified ? (
+                                                    <span>Mark as Unverified</span>
+                                                ) : (
+                                                    <span>Verify Vet</span>
+                                                )}
+                                            </button>
                                         </td>
                                     </tr>
                                 ))

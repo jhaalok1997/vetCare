@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Niconne } from "next/font/google";
 import { useEffect, useState } from "react";
-
+import { usePathname } from "next/navigation";
 
 export const niconne = Niconne({
   variable: "--font-niconne",
@@ -13,13 +13,14 @@ export const niconne = Niconne({
 
 export default function Footer() {
   const [hideForAdmin, setHideForAdmin] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem('user');
+      const raw = localStorage.getItem("user");
       if (raw) {
         const u = JSON.parse(raw);
-        if (u && u.role === 'admin') {
+        if (u && u.role === "admin") {
           setHideForAdmin(true);
           return;
         }
@@ -30,7 +31,11 @@ export default function Footer() {
     setHideForAdmin(false);
   }, []);
 
-  if (hideForAdmin) return null;
+  const hideForVetDashboard =
+    pathname &&
+    pathname.toLowerCase().startsWith("/veterinarian/dashboard");
+
+  if (hideForAdmin || hideForVetDashboard) return null;
   return (
     <footer className="bg-green-900 text-white mt-12 min-w-full">
       <div className="container mx-auto px-6 py-8 grid grid-cols-1 md:grid-cols-3 gap-16">

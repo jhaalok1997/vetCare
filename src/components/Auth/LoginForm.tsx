@@ -87,7 +87,8 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                     if (userForClient.role === "admin") {
                         router.push("/admin");
                     } else if (userForClient.role === "vet") {
-                        router.push("/veterinarian/dashboard");
+                        // Note: route folder is /veterinarian/Dashboard (capital D)
+                        router.push("/veterinarian/Dashboard");
                     } else {
                         router.replace("/");
                     }
