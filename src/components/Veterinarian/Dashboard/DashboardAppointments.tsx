@@ -1,5 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DashboardAppointment } from "./types";
+import {DashboardAppointment} from "./types"
+
+
 
 const formatDateTime = (value?: string | Date | null) => {
     if (!value) return "N/A";
