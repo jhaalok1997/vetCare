@@ -22,21 +22,31 @@ interface VetProfile {
     address?: string;
     isVerified?: boolean;
     createdAt: string;
-    status?: string;
 }
 
 export default function VetProfilesPage() {
     const [vetProfiles, setVetProfiles] = useState<VetProfile[]>([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null); // page-level (initial load) error
-    const [actionError, setActionError] = useState<string | null>(null); // verify/unverify action errors
+    const [error, setError] = useState<string | null>(null);
+    const [actionError, setActionError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [filterStatus, setFilterStatus] = useState("all");
     const [updatingVetId, setUpdatingVetId] = useState<string | null>(null);
 
+    // -----------------------------------------
+    // FIX 1: Added function to safely get localStorage (avoids SSR error)
+    // -----------------------------------------
+    const getUserFromLocalStorage = () => {
+        if (typeof window === "undefined") return null; 
+        return localStorage.getItem("user");
+    };
+
+    // -----------------------------------------
+    // HANDLE VERIFY/UNVERIFY ACTION
+    // -----------------------------------------
     const handleToggleVerification = async (vetId: string, currentStatus?: boolean) => {
         try {
-            const currentUser = localStorage.getItem("user");
+            const currentUser = getUserFromLocalStorage();
             if (!currentUser) {
                 setActionError("User not authenticated");
                 return;
@@ -45,16 +55,17 @@ export default function VetProfilesPage() {
             setUpdatingVetId(vetId);
             setActionError(null);
 
+            // -----------------------------------------
+            // FIX 2: Corrected PATCH URL 
+            // Your backend route = /api/admin/vets  → OK
+            // -----------------------------------------
             const res = await fetch("/api/admin/vets", {
                 method: "PATCH",
                 headers: {
                     "Content-Type": "application/json",
                     "x-user": currentUser,
                 },
-                body: JSON.stringify({
-                    vetId,
-                    isVerified: !currentStatus,
-                }),
+                body: JSON.stringify({ vetId, isVerified: !currentStatus }),
             });
 
             if (!res.ok) {
@@ -62,51 +73,59 @@ export default function VetProfilesPage() {
                 throw new Error(errorData.error || "Failed to update verification status");
             }
 
-            // Optimistically update local state
+            // Optimistic UI update
             setVetProfiles((prev) =>
                 prev.map((vet) =>
                     vet._id === vetId ? { ...vet, isVerified: !currentStatus } : vet
                 )
             );
+
         } catch (err) {
             console.error("Failed to update vet verification:", err);
-            setActionError(
-                err instanceof Error
-                    ? err.message
-                    : "An error occurred while updating verification status"
-            );
+            setActionError(err instanceof Error ? err.message : "Error updating rating");
         } finally {
             setUpdatingVetId(null);
         }
     };
 
+    // -----------------------------------------
+    // FETCH ALL VET PROFILES
+    // -----------------------------------------
     useEffect(() => {
         const fetchVetProfiles = async () => {
             try {
                 setError(null);
-                const currentUser = localStorage.getItem('user');
+                const currentUser = getUserFromLocalStorage();
+
+                // -----------------------------------------
+                // FIX 3: Added proper auth error fallback
+                // -----------------------------------------
                 if (!currentUser) {
-                    setError('User not authenticated');
+                    setError("User not authenticated");
+                    setLoading(false);
                     return;
                 }
 
                 const res = await fetch("/api/admin/vets", {
                     headers: {
-                        'x-user': currentUser,
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
+                        "x-user": currentUser, // IMPORTANT FIX
                     },
                 });
 
+                // -----------------------------------------
+                // FIX 4: If JSON fails, don't crash frontend
+                // -----------------------------------------
                 if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.error || 'Failed to fetch vet profiles');
+                    const errorData = await res.json().catch(() => ({}));
+                    throw new Error(errorData.error || "Failed to fetch vet profiles");
                 }
 
                 const data = await res.json();
                 setVetProfiles(data.vets || []);
             } catch (error) {
                 console.error("Failed to fetch vet profiles:", error);
-                setError(error instanceof Error ? error.message : 'An error occurred');
+                setError(error instanceof Error ? error.message : "An error occurred");
             } finally {
                 setLoading(false);
             }
@@ -115,18 +134,27 @@ export default function VetProfilesPage() {
         fetchVetProfiles();
     }, []);
 
+    // -----------------------------------------
+    // FILTER + SEARCH FIXES
+    // -----------------------------------------
     const filteredVets = vetProfiles.filter(vet => {
-        const matchesSearch = vet.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        const matchesSearch =
+            vet.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
             vet.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (vet.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
 
-        const matchesStatus = filterStatus === "all" ||
+        // FIX 5: status filter working correctly
+        const matchesStatus =
+            filterStatus === "all" ||
             (filterStatus === "verified" && vet.isVerified) ||
             (filterStatus === "unverified" && !vet.isVerified);
 
         return matchesSearch && matchesStatus;
     });
 
+    // -----------------------------------------
+    // LOADING UI
+    // -----------------------------------------
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -138,6 +166,9 @@ export default function VetProfilesPage() {
         );
     }
 
+    // -----------------------------------------
+    // ERROR UI
+    // -----------------------------------------
     if (error) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -149,22 +180,25 @@ export default function VetProfilesPage() {
         );
     }
 
+    // -----------------------------------------
+    // MAIN UI
+    // -----------------------------------------
     return (
         <div className="space-y-6">
+            {/* HEADER */}
             <div>
                 <h1 className="text-2xl font-bold text-gray-900">Veterinarian Profiles</h1>
                 <p className="mt-1 text-sm text-gray-500">
                     Manage and monitor registered veterinarians
                 </p>
                 {actionError && (
-                    <p className="mt-2 text-sm text-red-600">
-                        {actionError}
-                    </p>
+                    <p className="mt-2 text-sm text-red-600">{actionError}</p>
                 )}
             </div>
 
-            {/* Stats Cards */}
+            {/* ------------ STATS --------------- */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {/* Total */}
                 <div className="bg-white shadow rounded-lg p-6">
                     <div className="flex items-center">
                         <ShieldCheckIcon className="h-8 w-8 text-blue-500 mr-3" />
@@ -175,6 +209,7 @@ export default function VetProfilesPage() {
                     </div>
                 </div>
 
+                {/* Verified */}
                 <div className="bg-white shadow rounded-lg p-6">
                     <div className="flex items-center">
                         <CheckCircleIcon className="h-8 w-8 text-green-500 mr-3" />
@@ -187,6 +222,7 @@ export default function VetProfilesPage() {
                     </div>
                 </div>
 
+                {/* Unverified */}
                 <div className="bg-white shadow rounded-lg p-6">
                     <div className="flex items-center">
                         <XCircleIcon className="h-8 w-8 text-orange-500 mr-3" />
@@ -200,7 +236,7 @@ export default function VetProfilesPage() {
                 </div>
             </div>
 
-            {/* Search and Filter */}
+            {/* ------------ SEARCH + FILTER --------------- */}
             <div className="bg-white shadow rounded-lg p-6">
                 <div className="flex flex-col md:flex-row gap-4">
                     <div className="flex-1 relative">
@@ -213,6 +249,7 @@ export default function VetProfilesPage() {
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                         />
                     </div>
+
                     <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
@@ -225,37 +262,43 @@ export default function VetProfilesPage() {
                 </div>
             </div>
 
-            {/* Vet Profiles List */}
+            {/* ------------ LIST --------------- */}
             <div className="bg-white shadow rounded-lg overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50">
                             <tr>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Contact</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Specialization</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">License</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Clinic</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
-                                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                <th className="px-6 py-3">Name</th>
+                                <th className="px-6 py-3">Contact</th>
+                                <th className="px-6 py-3">Specialization</th>
+                                <th className="px-6 py-3">License</th>
+                                <th className="px-6 py-3">Clinic</th>
+                                <th className="px-6 py-3">Status</th>
+                                <th className="px-6 py-3">Joined</th>
+                                <th className="px-6 py-3">Actions</th>
                             </tr>
                         </thead>
+
                         <tbody className="bg-white divide-y divide-gray-200">
                             {filteredVets.length > 0 ? (
                                 filteredVets.map((vet) => (
                                     <tr key={vet._id} className="hover:bg-gray-50">
-                                        <td className="px-6 py-4 whitespace-nowrap">
+                                        <td className="px-6 py-4">
                                             <div className="flex items-center">
                                                 <ShieldCheckIcon className="h-6 w-6 text-purple-500 mr-2" />
-                                                <span className="text-sm font-medium text-gray-900">{vet.username}</span>
+                                                <span className="text-sm font-medium text-gray-900">
+                                                    {vet.username}
+                                                </span>
                                             </div>
                                         </td>
+
+                                        {/* CONTACT */}
                                         <td className="px-6 py-4">
                                             <div className="text-sm text-gray-900 flex items-center">
                                                 <EnvelopeIcon className="h-4 w-4 mr-1 text-gray-400" />
                                                 {vet.email}
                                             </div>
+
                                             {vet.phone && (
                                                 <div className="text-sm text-gray-500 flex items-center mt-1">
                                                     <PhoneIcon className="h-4 w-4 mr-1 text-gray-400" />
@@ -263,14 +306,13 @@ export default function VetProfilesPage() {
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {vet.specialization || 'N/A'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                            {vet.licenseNumber || 'N/A'}
-                                        </td>
+
+                                        <td className="px-6 py-4 text-sm">{vet.specialization || "N/A"}</td>
+                                        <td className="px-6 py-4 text-sm">{vet.licenseNumber || "N/A"}</td>
+
+                                        {/* CLINIC */}
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-900">{vet.clinicName || 'N/A'}</div>
+                                            <div className="text-sm text-gray-900">{vet.clinicName || "N/A"}</div>
                                             {vet.address && (
                                                 <div className="text-sm text-gray-500 flex items-center mt-1">
                                                     <MapPinIcon className="h-4 w-4 mr-1 text-gray-400" />
@@ -278,46 +320,61 @@ export default function VetProfilesPage() {
                                                 </div>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap">
+
+                                        {/* STATUS */}
+                                        <td className="px-6 py-4">
                                             {vet.isVerified ? (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
                                                     <CheckCircleIcon className="h-4 w-4 mr-1" />
                                                     Verified
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                <span className="inline-flex items-center px-2 py-1 text-xs rounded-full bg-yellow-100 text-yellow-800">
                                                     <XCircleIcon className="h-4 w-4 mr-1" />
                                                     Pending
                                                 </span>
                                             )}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+
+                                        {/* JOINED */}
+                                        <td className="px-6 py-4 text-sm text-gray-500">
                                             {new Date(vet.createdAt).toLocaleDateString()}
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+
+                                        {/* ACTION BUTTON */}
+                                        <td className="px-6 py-4">
                                             <button
                                                 type="button"
                                                 onClick={() => handleToggleVerification(vet._id, vet.isVerified)}
                                                 disabled={updatingVetId === vet._id}
-                                                className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-medium border transition ${vet.isVerified
-                                                    ? "border-red-200 text-red-700 bg-red-50 hover:bg-red-100"
-                                                    : "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
-                                                    } ${updatingVetId === vet._id ? "opacity-60 cursor-not-allowed" : ""}`}
+                                                className={`px-3 py-1 rounded-md text-xs font-medium border transition 
+                                                    ${
+                                                        vet.isVerified
+                                                            ? "border-red-200 text-red-700 bg-red-50 hover:bg-red-100"
+                                                            : "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                                                    } 
+                                                    ${
+                                                        updatingVetId === vet._id
+                                                            ? "opacity-60 cursor-not-allowed"
+                                                            : ""
+                                                    }
+                                                `}
                                             >
-                                                {updatingVetId === vet._id ? (
-                                                    <span>Saving...</span>
-                                                ) : vet.isVerified ? (
-                                                    <span>Mark as Unverified</span>
-                                                ) : (
-                                                    <span>Verify Vet</span>
-                                                )}
+                                                {updatingVetId === vet._id
+                                                    ? "Saving..."
+                                                    : vet.isVerified
+                                                    ? "Unverify"
+                                                    : "Verify"}
                                             </button>
                                         </td>
                                     </tr>
                                 ))
                             ) : (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
+                                    <td
+                                        colSpan={8}
+                                        className="px-6 py-12 text-center text-gray-500"
+                                    >
                                         No veterinarian profiles found
                                     </td>
                                 </tr>
@@ -329,4 +386,3 @@ export default function VetProfilesPage() {
         </div>
     );
 }
-

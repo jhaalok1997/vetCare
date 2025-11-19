@@ -1,136 +1,132 @@
+// app/api/admin/vets/route.ts
+
 import { NextResponse } from "next/server";
 import { connectDB } from "@/lib/mongoDb";
 import User from "@/models/AccountUser";
 import VetProfile from "@/models/VetProfile";
-import jwt, { JwtPayload } from "jsonwebtoken";
 
-interface AdminUser {
-  role: string;
-  // allow other properties but we only care about role
-  [key: string]: unknown;
-}
+// ✅ FIX ADDED:
+// Importing models WITHOUT assigning to variables ensures mongoose registers them.
+// DO NOT IMPORT WITH VARIABLE NAMES (ex: animalSchema) — unnecessary.
+// These imports MUST run before populate() is used.
+import "@/models/AnimalCategory";   // <-- FIX: registers AnimalCategory model
+import "@/models/DiseasesCategory";  // <-- FIX: registers DiseaseCategory model
+
+import jwt, { JwtPayload } from "jsonwebtoken";
 
 const SECRET = process.env.JWT_SECRET || "supersecret";
 
 interface AdminJwtPayload extends JwtPayload {
-  id: string;
-  email: string;
-  role: string;
-  tenantId: string;
+  id?: string;
+  email?: string;
+  role?: string;
+  tenantId?: string;
 }
 
-async function requireAdmin(req: Request): Promise<AdminUser | NextResponse> {
-  // First, try to read admin info from the x-user header (used by the admin UI)
+/**
+ * Authentication helper
+ * Works with both x-user header (reverse-proxy) or cookie JWT.
+ */
+async function requireAdmin(req: Request): Promise<AdminJwtPayload | NextResponse> {
   const userHeader = req.headers.get("x-user");
 
   if (userHeader) {
     try {
-      const user = JSON.parse(userHeader) as AdminUser;
-      if (user.role === "admin") {
-        return user;
-      }
-      // If role is present but not admin, treat as forbidden
-      return NextResponse.json(
-        { error: "Forbidden - Admin access required" },
-        { status: 403 }
-      );
-    } catch (e) {
-      console.error("Failed to parse user header:", e);
-      // Fall through to cookie-based auth below
+      const parsed = JSON.parse(userHeader) as AdminJwtPayload;
+      if (parsed.role === "admin") return parsed;
+      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
+    } catch (err) {
+      console.error("Failed to parse x-user header:", err);
     }
   }
 
-  // Fallback: verify admin from JWT in auth cookie, same as vet dashboard flow
   const cookieHeader = req.headers.get("cookie") || "";
   const match = cookieHeader.match(/auth=([^;]+)/);
   const token = match ? match[1] : null;
 
   if (!token) {
-    return NextResponse.json(
-      { error: "Unauthorized - No user information found" },
-      { status: 401 }
-    );
+    return NextResponse.json({ error: "Unauthorized - No user information found" }, { status: 401 });
   }
 
   try {
     const decoded = jwt.verify(token, SECRET) as AdminJwtPayload;
     if (decoded.role !== "admin") {
-      return NextResponse.json(
-        { error: "Forbidden - Admin access required" },
-        { status: 403 }
-      );
+      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 });
     }
-
-    return {
-      role: decoded.role,
-      id: decoded.id,
-      email: decoded.email,
-      tenantId: decoded.tenantId,
-    };
-  } catch (e) {
-    console.error("Failed to verify admin token:", e);
-    return NextResponse.json(
-      { error: "Invalid or expired admin token" },
-      { status: 401 }
-    );
+    return decoded;
+  } catch (err) {
+    console.error("Failed to verify admin token:", err);
+    return NextResponse.json({ error: "Invalid or expired admin token" }, { status: 401 });
   }
 }
 
+/**
+ * GET: Fetch all vets + vet profiles
+ */
 export async function GET(req: Request) {
   try {
     await connectDB();
 
-    // Check if user is admin
+    // Authentication
     const adminOrResponse = await requireAdmin(req);
-    if (adminOrResponse instanceof NextResponse) {
-      return adminOrResponse;
-    }
+    if (adminOrResponse instanceof NextResponse) return adminOrResponse;
 
-    // Get all veterinarians from User model
+    // Fetch ONLY users with role vet
     const vets = await User.find({ role: "vet" })
       .select("username email phone createdAt updatedAt")
       .sort({ createdAt: -1 });
 
-    // Get VetProfile data
+    // Fetch vet profiles and populate relations
+    // ✅ FIXED: populate works now because model imports above register schemas
     const vetProfiles = await VetProfile.find()
-      .populate("animalExpertise")
-      .populate("diseaseExpertise")
+      .populate("animalExpertise")   // works now
+      .populate("diseaseExpertise")  // works now
       .sort({ createdAt: -1 });
 
-    // Combine the data - merge vet users with their profiles
-    const combinedVetData = vets.map((vet) => {
-      const profile = vetProfiles.find(
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        (p: any) =>
-          p.accountUser?.toString?.() === vet._id.toString() ||
-          p.contact?.email === vet.email
-      );
+    const combined = vets.map((vet) => {
+      const vetId = vet?._id ? String(vet._id) : null;
+
+      const profile = vetProfiles.find((p) => {
+        const pAcc = p?.accountUser ? String(p.accountUser) : null;
+        return (
+          (pAcc && vetId && pAcc === vetId) ||
+          (p?.contact?.email && p.contact.email === vet.email)
+        );
+      });
 
       const isVerified = Boolean(profile?.isActive);
 
       return {
         _id: vet._id,
-        username: vet.username,
-        email: vet.email,
-        phone: vet.phone || profile?.contact?.phone,
-        specialization: profile?.tags?.join(", ") || "General Practice",
+        username: vet.username || "N/A",
+        email: vet.email || "N/A",
+        phone: vet.phone || profile?.contact?.phone || null,
+        specialization:
+          Array.isArray(profile?.tags) && profile.tags.length
+            ? profile.tags.join(", ")
+            : "General Practice",
         licenseNumber: profile?.qualifications || "N/A",
         clinicName: profile?.name || "N/A",
         address: profile?.contact?.location || "N/A",
+
+        // Populated fields
+        expertiseAnimals: profile?.animalExpertise || [],
+        expertiseDiseases: profile?.diseaseExpertise || [],
+
         isVerified,
-        createdAt: vet.createdAt,
         status: isVerified ? "active" : "inactive",
+        createdAt: vet.createdAt,
       };
     });
 
     return NextResponse.json({
-      vets: combinedVetData,
-      total: combinedVetData.length,
-      verified: combinedVetData.filter((v) => v.isVerified).length,
-      unverified: combinedVetData.filter((v) => !v.isVerified).length,
+      vets: combined,
+      total: combined.length,
+      verified: combined.filter((v) => v.isVerified).length,
+      unverified: combined.filter((v) => !v.isVerified).length,
     });
-  } catch (error) {
-    console.error("Vet profiles fetch error:", error);
+  } catch (err) {
+    console.error("Vet profiles fetch error:", err);
     return NextResponse.json(
       { error: "Failed to fetch vet profiles" },
       { status: 500 }
@@ -138,21 +134,18 @@ export async function GET(req: Request) {
   }
 }
 
+/**
+ * PATCH: Update vet verification status
+ */
 export async function PATCH(req: Request) {
   try {
     await connectDB();
 
-    // Check if user is admin
     const adminOrResponse = await requireAdmin(req);
-    if (adminOrResponse instanceof NextResponse) {
-      return adminOrResponse;
-    }
+    if (adminOrResponse instanceof NextResponse) return adminOrResponse;
 
     const body = await req.json();
-    const { vetId, isVerified } = body as {
-      vetId?: string;
-      isVerified?: boolean;
-    };
+    const { vetId, isVerified } = body;
 
     if (!vetId || typeof isVerified !== "boolean") {
       return NextResponse.json(
@@ -161,7 +154,6 @@ export async function PATCH(req: Request) {
       );
     }
 
-    // Try to find profile by accountUser first, then by contact.email if needed
     const vetUser = await User.findById(vetId).select("email username");
     if (!vetUser) {
       return NextResponse.json(
@@ -172,57 +164,38 @@ export async function PATCH(req: Request) {
 
     const update = { isActive: isVerified };
 
-    let updatedProfile =
-      (await VetProfile.findOneAndUpdate(
-        { accountUser: vetUser._id },
-        update,
-        { new: true }
-      )) ||
-      (await VetProfile.findOneAndUpdate(
+    let updatedProfile = await VetProfile.findOneAndUpdate(
+      { accountUser: vetUser._id },
+      update,
+      { new: true }
+    );
+
+    if (!updatedProfile) {
+      updatedProfile = await VetProfile.findOneAndUpdate(
         { "contact.email": vetUser.email },
         update,
         { new: true }
-      ));
+      );
+    }
 
-    // If no profile exists yet:
-    // - When verifying (isVerified === true), create a minimal VetProfile and mark it active.
-    // - When un-verifying and no profile exists, treat it as a no-op but still succeed.
-    if (!updatedProfile) {
-      if (isVerified) {
-        updatedProfile = await VetProfile.create({
-          accountUser: vetUser._id,
-          name: vetUser.username || vetUser.email,
-          contact: {
-            email: vetUser.email,
-          },
-          isActive: true,
-        });
-      } else {
-        // Nothing to deactivate, but the system already treats absence of a profile as "not verified".
-        return NextResponse.json({
-          message:
-            "No vet profile existed; status remains unverified and no profile was created.",
-          data: {
-            vetId,
-            isVerified: false,
-          },
-        });
-      }
+    if (!updatedProfile && isVerified) {
+      updatedProfile = await VetProfile.create({
+        accountUser: vetUser._id,
+        name: vetUser.username || vetUser.email,
+        contact: { email: vetUser.email },
+        isActive: true,
+      });
     }
 
     return NextResponse.json({
-      message: "Vet verification status updated successfully",
-      data: {
-        vetId,
-        isVerified,
-      },
+      message: "Vet verification status updated",
+      data: { vetId, isVerified },
     });
-  } catch (error) {
-    console.error("Vet verification update error:", error);
+  } catch (err) {
+    console.error("Vet verification update error:", err);
     return NextResponse.json(
       { error: "Failed to update vet verification status" },
       { status: 500 }
     );
   }
 }
-

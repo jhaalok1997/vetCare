@@ -148,10 +148,10 @@ export default function VetDashboard() {
 
             <Tabs defaultValue="overview" className="w-full">
                 <TabsList className="mb-4 flex flex-wrap">
-                    <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="appointments">Appointments</TabsTrigger>
-                    <TabsTrigger value="patients">Patients</TabsTrigger>
-                    <TabsTrigger value="messages">Messages</TabsTrigger>
+                    <TabsTrigger className="hover:bg-gray-500 cursor-pointer" value="overview">Overview</TabsTrigger>
+                    <TabsTrigger className="hover:bg-gray-500 cursor-pointer" value="appointments">Appointments</TabsTrigger>
+                    <TabsTrigger className="hover:bg-gray-500 cursor-pointer" value="patients">Patients</TabsTrigger>
+                    <TabsTrigger className="hover:bg-gray-500 cursor-pointer" value="messages">Messages</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="overview">
