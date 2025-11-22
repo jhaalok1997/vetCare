@@ -38,6 +38,10 @@ const UserSchema = new Schema(
       type: Date,
       default: null,
     },
+    lastLogin: {
+      type: Date,
+      default: Date.now,
+    },
   },
   { timestamps: true }
 );
