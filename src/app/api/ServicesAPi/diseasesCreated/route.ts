@@ -6,8 +6,8 @@ import DiseaseCategory from "@/models/DiseasesCategory";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    console.log('Received request body:', body);
-    
+    // console.log('Received request body:', body);
+
     const {
       DiseaseType,
       UrgencyLevel: rawUrgencyLevel,

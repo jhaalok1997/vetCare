@@ -42,9 +42,9 @@ export async function GET(req: Request) {
     }
 
     // Log connection status and counts for debugging
-    console.log("Database connection status: Connected");
+    // console.log("Database connection status: Connected");
     const userCount = await User.countDocuments();
-    console.log("Total users in database:", userCount);
+    // console.log("Total users in database:", userCount);
 
     // Get basic user statistics
     const totalUsers = await User.countDocuments();
@@ -133,7 +133,7 @@ export async function GET(req: Request) {
     const lastWeekUsers = await User.countDocuments({
       createdAt: { $lt: sevenDaysAgo },
     });
-    const growthPercentage = lastWeekUsers > 0 
+    const growthPercentage = lastWeekUsers > 0
       ? (((totalUsers - lastWeekUsers) / lastWeekUsers) * 100).toFixed(1)
       : 0;
 

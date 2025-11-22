@@ -43,11 +43,11 @@ export default function SettingsPage() {
 
     const handleSaveSettings = () => {
         // In a real application, this would make an API call
-        console.log("Saving settings:", {
-            general: generalSettings,
-            notifications: notificationSettings,
-            security: securitySettings,
-        });
+        // console.log("Saving settings:", {
+        //     general: generalSettings,
+        //     notifications: notificationSettings,
+        //     security: securitySettings,
+        // });
 
         setSaveSuccess(true);
         setTimeout(() => setSaveSuccess(false), 3000);
@@ -88,8 +88,8 @@ export default function SettingsPage() {
                                 key={tab.id}
                                 onClick={() => setActiveTab(tab.id)}
                                 className={`group inline-flex items-center px-6 py-4 border-b-2 font-medium text-sm ${activeTab === tab.id
-                                        ? "border-emerald-500 text-emerald-600"
-                                        : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+                                    ? "border-emerald-500 text-emerald-600"
+                                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                     }`}
                             >
                                 <tab.icon

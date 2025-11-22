@@ -83,7 +83,7 @@ export default function AnalyticsPage() {
         }
 
         const dashboardData = await res.json();
-        console.log('Dashboard Data:', dashboardData); // Debug log
+        // console.log('Dashboard Data:', dashboardData); // Debug log
         setData(dashboardData);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);

@@ -112,7 +112,7 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
       }
     } catch (error) {
       dispatch({ type: "SET_MESSAGE", message: "❌ An error occurred. Please try again." });
-      console.log(error);
+      // console.error(error);
     } finally {
       dispatch({ type: "SET_LOADING", isLoading: false });
     }
