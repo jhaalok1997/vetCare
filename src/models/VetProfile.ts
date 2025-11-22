@@ -30,9 +30,7 @@ const VetProfileSchema = new mongoose.Schema(
     },
 
     // ✅ FIXED: AnimalType ❌ → AnimalCategory ✔
-    animalExpertise: [
-      { type: mongoose.Schema.Types.ObjectId, ref: "AnimalCategory" },
-    ],
+    animalExpertise: [String],
 
     // DiseaseCategory should exist — if not, tell me & I will generate it
     diseaseExpertise: [

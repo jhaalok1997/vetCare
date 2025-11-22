@@ -80,23 +80,26 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                         console.warn('Unable to persist user to localStorage', e);
                     }
 
-                    // Call parent callback with the stored user object
+                    // Call parent callback to update AuthWrapper state
                     onSuccess?.(userForClient);
 
                     // Role-based redirects
                     if (userForClient.role === "admin") {
-                        router.push("/admin");
+                        // Use setTimeout to allow AuthWrapper to update state before redirect
+                        setTimeout(() => {
+                            window.location.href = "/admin";
+                        }, 100);
                     } else if (userForClient.role === "vet") {
                         // Note: route folder is /veterinarian/Dashboard (capital D)
-                        router.push("/veterinarian/Dashboard");
+                        setTimeout(() => {
+                            window.location.href = "/veterinarian/Dashboard";
+                        }, 100);
                     } else {
                         router.replace("/");
                     }
-                    router.refresh();
                 } else {
                     // Fallback: default redirect
                     router.replace("/");
-                    router.refresh();
                 }
             } else {
                 setMessage(`❌ ${data.error}`);

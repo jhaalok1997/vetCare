@@ -40,7 +40,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
         return (
             <>
                 {/* Blurred background */}
-                <div className="relative min-h-screen">
+                <div className="relative min-h-screen" aria-hidden="true">
                     <div className="absolute inset-0 filter blur-sm pointer-events-none">
                         {children}
                     </div>
@@ -55,7 +55,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
                             className="absolute inset-0 flex items-center justify-center p-4"
                         >
                             <div className="w-full max-w-md">
-                                {showSignup? (
+                                {showSignup ? (
                                     <>
                                         <SignupForm onSuccess={() => setShowSignup(false)} />
                                         <p className="text-center mt-4 text-gray-600">
@@ -90,10 +90,10 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
         );
     }
 
-    return(
-     <>
-    
-       {children}
-    </>
+    return (
+        <>
+
+            {children}
+        </>
     )
 }

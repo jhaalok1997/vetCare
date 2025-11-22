@@ -33,17 +33,17 @@ export default function VetProfilesPage() {
     const [filterStatus, setFilterStatus] = useState("all");
     const [updatingVetId, setUpdatingVetId] = useState<string | null>(null);
 
-    // -----------------------------------------
-    // FIX 1: Added function to safely get localStorage (avoids SSR error)
-    // -----------------------------------------
+    
+    // Added function to safely get localStorage (avoids SSR error)
+    
     const getUserFromLocalStorage = () => {
-        if (typeof window === "undefined") return null; 
+        if (typeof window === "undefined") return null;
         return localStorage.getItem("user");
     };
 
-    // -----------------------------------------
+    
     // HANDLE VERIFY/UNVERIFY ACTION
-    // -----------------------------------------
+    
     const handleToggleVerification = async (vetId: string, currentStatus?: boolean) => {
         try {
             const currentUser = getUserFromLocalStorage();
@@ -55,10 +55,10 @@ export default function VetProfilesPage() {
             setUpdatingVetId(vetId);
             setActionError(null);
 
-            // -----------------------------------------
-            // FIX 2: Corrected PATCH URL 
-            // Your backend route = /api/admin/vets  → OK
-            // -----------------------------------------
+        
+            // Corrected PATCH URL 
+            
+            
             const res = await fetch("/api/admin/vets", {
                 method: "PATCH",
                 headers: {
@@ -88,18 +88,18 @@ export default function VetProfilesPage() {
         }
     };
 
-    // -----------------------------------------
+    
     // FETCH ALL VET PROFILES
-    // -----------------------------------------
+    
     useEffect(() => {
         const fetchVetProfiles = async () => {
             try {
                 setError(null);
                 const currentUser = getUserFromLocalStorage();
 
-                // -----------------------------------------
-                // FIX 3: Added proper auth error fallback
-                // -----------------------------------------
+
+                // Added proper auth error fallback
+
                 if (!currentUser) {
                     setError("User not authenticated");
                     setLoading(false);
@@ -113,9 +113,9 @@ export default function VetProfilesPage() {
                     },
                 });
 
-                // -----------------------------------------
-                // FIX 4: If JSON fails, don't crash frontend
-                // -----------------------------------------
+
+                // If JSON fails, don't crash frontend
+
                 if (!res.ok) {
                     const errorData = await res.json().catch(() => ({}));
                     throw new Error(errorData.error || "Failed to fetch vet profiles");
@@ -134,16 +134,16 @@ export default function VetProfilesPage() {
         fetchVetProfiles();
     }, []);
 
-    // -----------------------------------------
+
     // FILTER + SEARCH FIXES
-    // -----------------------------------------
+
     const filteredVets = vetProfiles.filter(vet => {
         const matchesSearch =
             vet.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
             vet.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (vet.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
 
-        // FIX 5: status filter working correctly
+        // status filter working correctly
         const matchesStatus =
             filterStatus === "all" ||
             (filterStatus === "verified" && vet.isVerified) ||
@@ -152,9 +152,9 @@ export default function VetProfilesPage() {
         return matchesSearch && matchesStatus;
     });
 
-    // -----------------------------------------
+
     // LOADING UI
-    // -----------------------------------------
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -166,9 +166,9 @@ export default function VetProfilesPage() {
         );
     }
 
-    // -----------------------------------------
+
     // ERROR UI
-    // -----------------------------------------
+
     if (error) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -180,9 +180,6 @@ export default function VetProfilesPage() {
         );
     }
 
-    // -----------------------------------------
-    // MAIN UI
-    // -----------------------------------------
     return (
         <div className="space-y-6">
             {/* HEADER */}
@@ -197,6 +194,7 @@ export default function VetProfilesPage() {
             </div>
 
             {/* ------------ STATS --------------- */}
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Total */}
                 <div className="bg-white shadow rounded-lg p-6">
@@ -348,23 +346,21 @@ export default function VetProfilesPage() {
                                                 onClick={() => handleToggleVerification(vet._id, vet.isVerified)}
                                                 disabled={updatingVetId === vet._id}
                                                 className={`px-3 py-1 rounded-md text-xs font-medium border transition 
-                                                    ${
-                                                        vet.isVerified
-                                                            ? "border-red-200 text-red-700 bg-red-50 hover:bg-red-100"
-                                                            : "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
+                                                    ${vet.isVerified
+                                                        ? "border-red-200 text-red-700 bg-red-50 hover:bg-red-100"
+                                                        : "border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100"
                                                     } 
-                                                    ${
-                                                        updatingVetId === vet._id
-                                                            ? "opacity-60 cursor-not-allowed"
-                                                            : ""
+                                                    ${updatingVetId === vet._id
+                                                        ? "opacity-60 cursor-not-allowed"
+                                                        : ""
                                                     }
                                                 `}
                                             >
                                                 {updatingVetId === vet._id
                                                     ? "Saving..."
                                                     : vet.isVerified
-                                                    ? "Unverify"
-                                                    : "Verify"}
+                                                        ? "Unverify"
+                                                        : "Verify"}
                                             </button>
                                         </td>
                                     </tr>

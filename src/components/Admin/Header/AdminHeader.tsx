@@ -28,7 +28,7 @@ export default function AdminHeader({ user, toggleSidebar }: AdminHeaderProps) {
             });
             if (res.ok) {
                 try { localStorage.removeItem('user'); } catch { }
-                router.push("/login");
+                window.location.href = "/";
             }
         } catch (error) {
             console.error("Logout failed:", error);

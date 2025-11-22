@@ -31,7 +31,7 @@ export default function VetDashboard() {
                 } catch {
                     // ignore
                 }
-                router.push("/login");
+                window.location.href = "/";
             }
         } catch (err) {
             console.error("Logout failed:", err);

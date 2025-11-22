@@ -59,7 +59,7 @@ export default function ActiveUsersPage() {
                 let userObj;
                 try {
                     userObj = JSON.parse(rawUser);
-                } catch  {
+                } catch {
                     alert('Corrupted user data. Please log in again.');
                     setLoading(false);
                     return;
@@ -120,6 +120,21 @@ export default function ActiveUsersPage() {
         ) : (
             <XCircleIcon className="h-5 w-5 text-red-500" />
         );
+    };
+
+    const getRelativeTime = (date: string) => {
+        const now = new Date();
+        const loginDate = new Date(date);
+        const diffMs = now.getTime() - loginDate.getTime();
+
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} min ago`;
+        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
     };
 
     if (loading) {
@@ -271,7 +286,7 @@ export default function ActiveUsersPage() {
                                         <div className="flex items-center mt-1">
                                             <ClockIcon className="h-4 w-4 text-gray-400 mr-1" />
                                             <p className="text-xs text-gray-500">
-                                                Last login: {new Date(user.lastLogin).toLocaleDateString()}
+                                                Last login: {getRelativeTime(user.lastLogin)}
                                             </p>
                                         </div>
                                     </div>
