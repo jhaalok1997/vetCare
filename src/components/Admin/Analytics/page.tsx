@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios, { AxiosError } from "axios";
 import {
   UsersIcon,
   UserGroupIcon,
@@ -63,31 +64,23 @@ export default function AnalyticsPage() {
     const fetchAnalytics = async () => {
       try {
         setError(null);
-        // Get current user from localStorage or your auth management system
         const currentUser = localStorage.getItem('user');
         if (!currentUser) {
           setError('User not authenticated');
           return;
         }
 
-        const res = await fetch("/api/admin/dashboard", {
+        const res = await axios.get("/api/admin/dashboard", {
           headers: {
-            'x-user': currentUser, // Send the user data in header
+            'x-user': currentUser,
             'Content-Type': 'application/json',
           },
         });
-
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.error || 'Failed to fetch dashboard data');
-        }
-
-        const dashboardData = await res.json();
-        // console.log('Dashboard Data:', dashboardData); // Debug log
-        setData(dashboardData);
+        setData(res.data);
       } catch (error) {
         console.error("Failed to fetch dashboard data:", error);
-        setError(error instanceof Error ? error.message : 'An error occurred');
+        const err = error as AxiosError<{ error?: string }>;
+        setError(err.response?.data?.error || 'An error occurred');
       } finally {
         setLoading(false);
       }

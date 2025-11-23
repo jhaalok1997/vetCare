@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios, { AxiosError } from "axios";
 import {
     ShieldCheckIcon,
     EnvelopeIcon,
@@ -33,17 +34,17 @@ export default function VetProfilesPage() {
     const [filterStatus, setFilterStatus] = useState("all");
     const [updatingVetId, setUpdatingVetId] = useState<string | null>(null);
 
-    
+
     // Added function to safely get localStorage (avoids SSR error)
-    
+
     const getUserFromLocalStorage = () => {
         if (typeof window === "undefined") return null;
         return localStorage.getItem("user");
     };
 
-    
+
     // HANDLE VERIFY/UNVERIFY ACTION
-    
+
     const handleToggleVerification = async (vetId: string, currentStatus?: boolean) => {
         try {
             const currentUser = getUserFromLocalStorage();
@@ -55,23 +56,15 @@ export default function VetProfilesPage() {
             setUpdatingVetId(vetId);
             setActionError(null);
 
-        
-            // Corrected PATCH URL 
-            
-            
-            const res = await fetch("/api/admin/vets", {
-                method: "PATCH",
-                headers: {
-                    "Content-Type": "application/json",
-                    "x-user": currentUser,
-                },
-                body: JSON.stringify({ vetId, isVerified: !currentStatus }),
-            });
-
-            if (!res.ok) {
-                const errorData = await res.json().catch(() => ({}));
-                throw new Error(errorData.error || "Failed to update verification status");
-            }
+            const res = await axios.patch("/api/admin/vets",
+                { vetId, isVerified: !currentStatus },
+                {
+                    headers: {
+                        "Content-Type": "application/json",
+                        "x-user": currentUser,
+                    },
+                }
+            );
 
             // Optimistic UI update
             setVetProfiles((prev) =>
@@ -82,23 +75,21 @@ export default function VetProfilesPage() {
 
         } catch (err) {
             console.error("Failed to update vet verification:", err);
-            setActionError(err instanceof Error ? err.message : "Error updating rating");
+            const error = err as AxiosError<{ error?: string }>;
+            setActionError(error.response?.data?.error || "Error updating rating");
         } finally {
             setUpdatingVetId(null);
         }
     };
 
-    
+
     // FETCH ALL VET PROFILES
-    
+
     useEffect(() => {
         const fetchVetProfiles = async () => {
             try {
                 setError(null);
                 const currentUser = getUserFromLocalStorage();
-
-
-                // Added proper auth error fallback
 
                 if (!currentUser) {
                     setError("User not authenticated");
@@ -106,26 +97,17 @@ export default function VetProfilesPage() {
                     return;
                 }
 
-                const res = await fetch("/api/admin/vets", {
+                const res = await axios.get("/api/admin/vets", {
                     headers: {
                         "Content-Type": "application/json",
-                        "x-user": currentUser, // IMPORTANT FIX
+                        "x-user": currentUser,
                     },
                 });
-
-
-                // If JSON fails, don't crash frontend
-
-                if (!res.ok) {
-                    const errorData = await res.json().catch(() => ({}));
-                    throw new Error(errorData.error || "Failed to fetch vet profiles");
-                }
-
-                const data = await res.json();
-                setVetProfiles(data.vets || []);
+                setVetProfiles(res.data.vets || []);
             } catch (error) {
                 console.error("Failed to fetch vet profiles:", error);
-                setError(error instanceof Error ? error.message : "An error occurred");
+                const err = error as AxiosError<{ error?: string }>;
+                setError(err.response?.data?.error || "An error occurred");
             } finally {
                 setLoading(false);
             }

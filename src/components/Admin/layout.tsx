@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios from "axios";
 import AdminSidebar from "@/components/Admin/Sidebar/AdminSidebar";
 import AdminHeader from "@/components/Admin/Header/AdminHeader";
 import AdminAuthWrapper from "@/components/Admin/AuthWrapper/AdminAuthWrapper";
@@ -24,14 +25,9 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     useEffect(() => {
         const fetchUser = async () => {
             try {
-                const res = await fetch("/api/Auth/profile", {
-                    credentials: 'include' // Important: Include credentials for cookie
-                });
-                if (res.ok) {
-                    const userData = await res.json();
-                    if (userData.user) {
-                        setUser(userData.user);
-                    }
+                const res = await axios.get("/api/Auth/profile");
+                if (res.data.user) {
+                    setUser(res.data.user);
                 }
             } catch (error) {
                 console.error("Failed to fetch user data:", error);

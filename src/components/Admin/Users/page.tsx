@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios from "axios";
 import {
     UsersIcon,
     EyeIcon,
@@ -49,7 +50,6 @@ export default function ActiveUsersPage() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                // Get current user from localStorage and validate
                 const rawUser = localStorage.getItem('user');
                 if (!rawUser) {
                     alert('User not authenticated. Please log in as admin.');
@@ -70,20 +70,14 @@ export default function ActiveUsersPage() {
                     return;
                 }
 
-                const res = await fetch("/api/admin/users", {
+                const res = await axios.get("/api/admin/users", {
                     headers: {
                         'x-user': JSON.stringify(userObj),
                         'Content-Type': 'application/json',
                     },
                 });
-                if (res.ok) {
-                    const data = await res.json();
-                    setUsers(data.users);
-                    setStats(data.stats);
-                } else {
-                    const errorData = await res.json();
-                    alert(errorData.error || 'Failed to fetch users');
-                }
+                setUsers(res.data.users);
+                setStats(res.data.stats);
             } catch (error) {
                 console.error("Failed to fetch users:", error);
                 alert('An error occurred while fetching users.');

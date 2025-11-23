@@ -1,32 +1,71 @@
 "use client"
 import { Button } from "@/components/ui/button"
-//import Link from "next/link"
+import { Calendar, Stethoscope, Upload, ArrowRight } from "lucide-react"
+import { useState } from "react"
+import BookAppointmentModal from "./BookAppointmentModal"
+import UploadReportModal from "./UploadReportModal"
 
 export default function QuickActions() {
+    const [showBookingModal, setShowBookingModal] = useState(false)
+    const [showUploadModal, setShowUploadModal] = useState(false)
+
+    const handleBookAppointment = () => {
+        setShowBookingModal(true)
+    }
+
+    const handleFindVet = () => {
+        window.location.href = "/find-vet"
+    }
+
+    const handleUploadReport = () => {
+        setShowUploadModal(true)
+    }
+
     return (
         <section className="max-w-full mx-auto px-2 py-5">
-            <div className="mb-6">
-                <h3 className="text-2xl font-bold">Quick Actions</h3>
-                <p className="text-gray-600">Get started with the most common tasks</p>
+            <div className="mb-8">
+                <h3 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+                    Quick Actions
+                </h3>
+                <p className="text-gray-600 mt-2">Get started with the most common tasks</p>
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 lg:gap-12">
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 <ActionCard
                     title="Book Appointment"
                     description="Schedule a visit with a veterinarian"
                     cta="Book Now"
+                    icon={<Calendar className="w-8 h-8" />}
+                    gradient="from-blue-500 to-cyan-500"
+                    onClick={handleBookAppointment}
                 />
-                <ActionCard
+                {/* <ActionCard
                     title="Find a Vet"
                     description="Discover nearby vets and specialists"
                     cta="Browse Vets"
-                />
+                    icon={<Stethoscope className="w-8 h-8" />}
+                    gradient="from-emerald-500 to-teal-500"
+                    onClick={handleFindVet}
+                /> */}
                 <ActionCard
                     title="Upload Report"
                     description="Share lab results or case files"
                     cta="Upload"
+                    icon={<Upload className="w-8 h-8" />}
+                    gradient="from-purple-500 to-pink-500"
+                    onClick={handleUploadReport}
                 />
             </div>
+
+            {/* Modals */}
+            <BookAppointmentModal
+                isOpen={showBookingModal}
+                onClose={() => setShowBookingModal(false)}
+            />
+            <UploadReportModal
+                isOpen={showUploadModal}
+                onClose={() => setShowUploadModal(false)}
+            />
         </section>
     )
 }
@@ -35,20 +74,42 @@ function ActionCard({
     title,
     description,
     cta,
+    icon,
+    gradient,
+    onClick,
 }: {
     title: string
     description: string
     cta: string
+    icon: React.ReactNode
+    gradient: string
+    onClick: () => void
 }) {
     return (
-        <div className="rounded-xl w-90 h-40 border bg-white p-6 shadow-sm transition-shadow hover:shadow-md">
-            <h4 className="text-lg font-semibold mb-1">{title}</h4>
-            <p className="text-gray-600 mb-4 text-sm">{description}</p>
-            <Button className="w-full" size="lg">
-                {cta}
+        <div
+            className="group relative rounded-2xl border border-gray-200 bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer overflow-hidden"
+            onClick={onClick}
+        >
+            {/* Gradient background on hover */}
+            <div className={`absolute inset-0 bg-gradient-to-br ${gradient} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+
+            {/* Icon with gradient background */}
+            <div className={`inline-flex p-3 rounded-xl bg-gradient-to-br ${gradient} text-white mb-4 shadow-lg`}>
+                {icon}
+            </div>
+
+            {/* Content */}
+            <h4 className="text-xl font-bold mb-2 text-gray-900">{title}</h4>
+            <p className="text-gray-600 mb-6 text-sm leading-relaxed">{description}</p>
+
+            {/* CTA Button */}
+            <Button
+                className={`w-full bg-gradient-to-r ${gradient} hover:opacity-90 text-white font-semibold shadow-md group/btn`}
+                size="lg"
+            >
+                <span>{cta}</span>
+                <ArrowRight className="w-4 h-4 ml-2 transition-transform group-hover/btn:translate-x-1" />
             </Button>
         </div>
     )
 }
-
-

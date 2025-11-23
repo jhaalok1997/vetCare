@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios from "axios";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignUpForm";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,8 +20,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const res = await fetch("/api/Auth/profile");
-                setIsAuth(res.ok);
+                await axios.get("/api/Auth/profile");
+                setIsAuth(true);
             } catch {
                 setIsAuth(false);
             } finally {

@@ -2,6 +2,7 @@
 
 import { useReducer } from "react";
 import { motion } from "framer-motion";
+import axios, { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 
 interface SignupFormProps {
@@ -97,22 +98,12 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
     dispatch({ type: "SET_LOADING", isLoading: true });
 
     try {
-      const res = await fetch("/api/Auth/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password, role, tenantId, animalExpertise }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        dispatch({ type: "SET_MESSAGE", message: "✅ Signup successful! Please login." });
-        if (onSuccess) onSuccess();
-      } else {
-        dispatch({ type: "SET_MESSAGE", message: `❌ ${data.error}` });
-      }
+      const res = await axios.post("/api/Auth/signup", { username, email, password, role, tenantId, animalExpertise });
+      dispatch({ type: "SET_MESSAGE", message: "✅ Signup successful! Please login." });
+      if (onSuccess) onSuccess();
     } catch (error) {
-      dispatch({ type: "SET_MESSAGE", message: "❌ An error occurred. Please try again." });
-      // console.error(error);
+      const err = error as AxiosError<{ error?: string }>;
+      dispatch({ type: "SET_MESSAGE", message: `❌ ${err.response?.data?.error || "An error occurred. Please try again."}` });
     } finally {
       dispatch({ type: "SET_LOADING", isLoading: false });
     }

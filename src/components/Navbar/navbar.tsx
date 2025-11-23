@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import axios from "axios";
 import { NavigationMenu, NavigationMenuItem, NavigationMenuList } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -39,16 +40,12 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
-      const res = await fetch("/api/Auth/logout", {
-        method: "POST",
-      });
-      if (res.ok) {
-        setIsAuth(false);
-        setUserRole(null);
-        setUsername(null);
-        try { localStorage.removeItem('user'); } catch { }
-        window.location.href = "/"; // Redirect to home page
-      }
+      await axios.post("/api/Auth/logout");
+      setIsAuth(false);
+      setUserRole(null);
+      setUsername(null);
+      try { localStorage.removeItem('user'); } catch { }
+      window.location.href = "/"; // Redirect to home page
     } catch (error) {
       console.error("Logout error:", error);
     }
@@ -70,27 +67,20 @@ export default function Navbar() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await fetch("/api/Auth/profile");
-        if (res.ok) {
-          const data = await res.json();
-          setIsAuth(true);
-          setUserRole(data.user?.role || null);
-          setUsername(data.user?.username || null);
+        const res = await axios.get("/api/Auth/profile");
+        setIsAuth(true);
+        setUserRole(res.data.user?.role || null);
+        setUsername(res.data.user?.username || null);
 
-          // Update navigation items based on user role
-          const baseItems = [
-            { name: "Home", href: "/" },
-            { name: "About", href: "/about" },
-            { name: "Services", href: "/services" },
-            { name: "Contact", href: "/contact" }
-          ];
+        // Update navigation items based on user role
+        const baseItems = [
+          { name: "Home", href: "/" },
+          { name: "About", href: "/about" },
+          { name: "Services", href: "/services" },
+          { name: "Contact", href: "/contact" }
+        ];
 
-          setNavItems(baseItems);
-        } else {
-          setIsAuth(false);
-          setUserRole(null);
-          setUsername(null);
-        }
+        setNavItems(baseItems);
       } catch {
         setIsAuth(false);
         setUserRole(null);
@@ -255,6 +245,6 @@ export default function Navbar() {
         </div>
       </div>
     </header>
-  
+
   );
 }

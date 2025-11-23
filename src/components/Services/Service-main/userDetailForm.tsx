@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { useState, useEffect } from "react";
+import axios, { AxiosError } from "axios";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
@@ -47,63 +48,46 @@ export default function UserDetailForm() {
 
         try {
             // Owner info
-            const ownerRes = await fetch("/api/ServicesAPi/patientOwner", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    ownerEmail: data.ownerEmail,
-                    countryCode: data.countryCode,
-                    ownerPhone: data.ownerPhone,
-                    preferredContactMethod: data.preferredContactMethod,
-                }),
+            const ownerRes = await axios.post("/api/ServicesAPi/patientOwner", {
+                ownerEmail: data.ownerEmail,
+                countryCode: data.countryCode,
+                ownerPhone: data.ownerPhone,
+                preferredContactMethod: data.preferredContactMethod,
             });
 
-            const ownerResult = await ownerRes.json();
-            if (!ownerRes.ok || !ownerResult.success) throw new Error(ownerResult.message);
+            if (!ownerRes.data.success) throw new Error(ownerRes.data.message);
 
             // Pet info
-            const petRes = await fetch("/api/ServicesAPi/animalCreated", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    petName: data.petName,
-                    animalType: predefinedAnimalTypes.find((a) => a._id === data.animalType)?.name,
-                    petAge: data.petAge,
-                    petBreed: data.petBreed,
-                }),
+            const petRes = await axios.post("/api/ServicesAPi/animalCreated", {
+                petName: data.petName,
+                animalType: predefinedAnimalTypes.find((a) => a._id === data.animalType)?.name,
+                petAge: data.petAge,
+                petBreed: data.petBreed,
             });
 
-            const petResult = await petRes.json();
-            if (!petRes.ok || !petResult.success) throw new Error(petResult.message);
+            if (!petRes.data.success) throw new Error(petRes.data.message);
 
             // Disease info
-            const diseaseRes = await fetch("/api/ServicesAPi/diseasesCreated", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    DiseaseType: data.diseaseCategory,
-                    UrgencyLevel: data.urgency.charAt(0).toUpperCase() + data.urgency.slice(1),
-                    Duration: Number(data.duration),
-                    Symptoms: data.symptoms.split(",").map((s) => s.trim()),
-                    AdditionalInfo: data.additionalNotes || "",
-                }),
+            const diseaseRes = await axios.post("/api/ServicesAPi/diseasesCreated", {
+                DiseaseType: data.diseaseCategory,
+                UrgencyLevel: data.urgency.charAt(0).toUpperCase() + data.urgency.slice(1),
+                Duration: Number(data.duration),
+                Symptoms: data.symptoms.split(",").map((s) => s.trim()),
+                AdditionalInfo: data.additionalNotes || "",
             });
 
-            const diseaseResult = await diseaseRes.json();
-            if (!diseaseRes.ok || !diseaseResult.success) throw new Error(diseaseResult.message);
+            if (!diseaseRes.data.success) throw new Error(diseaseRes.data.message);
 
             // Diagnosis AI call
-            const llmRes = await fetch("/api/FormPateintDiagnose", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(data),
-            });
+            const llmRes = await axios.post("/api/FormPateintDiagnose", data);
 
-            const llmResult = await llmRes.json();
-            setDiagnosisReport(llmResult.report || "No diagnosis found.");
+            setDiagnosisReport(llmRes.data.report || "No diagnosis found.");
             reset();
-        } catch (err: unknown) {
+        } catch (err) {
             console.error("Error submitting form:", err);
+            const error = err as AxiosError<{ message?: string }>;
+            // You might want to set a UI error state here
+            console.error(error.response?.data?.message || error.message);
         } finally {
             setIsSubmitting(false);
         }

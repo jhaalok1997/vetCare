@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import axios, { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { jwtDecode } from "jwt-decode";  // lightweight JWT decoder (no verify, just parse payload)
@@ -39,20 +40,15 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         setIsLoading(true);
 
         if (!email || !password) {
-            setMessage("❌ Please fill in all fields");
+            setMessage(" Please fill in all fields");
             setIsLoading(false);
             return;
         }
 
         try {
-            const res = await fetch("/api/Auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password }),
-            });
-
-            const data = await res.json();
-            if (res.ok) {
+            const res = await axios.post("/api/Auth/login", { email, password });
+            const data = res.data;
+            if (res.status === 200) {
                 setMessage("✅ Login successful!");
 
                 // Prefer the explicit user object returned by the API
@@ -101,11 +97,10 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
                     // Fallback: default redirect
                     router.replace("/");
                 }
-            } else {
-                setMessage(`❌ ${data.error}`);
             }
         } catch (error) {
-            setMessage("❌ An error occurred. Please try again.");
+            const err = error as AxiosError<{ error?: string }>;
+            setMessage(`❌ ${err.response?.data?.error || "An error occurred. Please try again."}`);
             console.error(error);
         }
 
@@ -123,21 +118,14 @@ export default function LoginForm({ onSuccess }: LoginFormProps) {
         }
 
         try {
-            const res = await fetch("/api/Auth/forgot-password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email }),
-            });
-
-            const data = await res.json();
-            if (res.ok) {
+            const res = await axios.post("/api/Auth/forgot-password", { email });
+            if (res.status === 200) {
                 setMessage("✅ Password reset link sent to your email");
                 setShowForgotPassword(false);
-            } else {
-                setMessage(`❌ ${data.error}`);
             }
         } catch (error) {
-            setMessage("❌ An error occurred. Please try again.");
+            const err = error as AxiosError<{ error?: string }>;
+            setMessage(`❌ ${err.response?.data?.error || "An error occurred. Please try again."}`);
             console.error(error);
         }
 

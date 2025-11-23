@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import { Bars3Icon, BellIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 
 interface User {
@@ -23,13 +24,9 @@ export default function AdminHeader({ user, toggleSidebar }: AdminHeaderProps) {
 
     const handleLogout = async () => {
         try {
-            const res = await fetch("/api/Auth/logout", {
-                method: "POST",
-            });
-            if (res.ok) {
-                try { localStorage.removeItem('user'); } catch { }
-                window.location.href = "/";
-            }
+            await axios.post("/api/Auth/logout");
+            try { localStorage.removeItem('user'); } catch { }
+            window.location.href = "/";
         } catch (error) {
             console.error("Logout failed:", error);
         }

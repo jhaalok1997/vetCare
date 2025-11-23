@@ -1,4 +1,5 @@
 "use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useMemo } from "react"
 
@@ -26,7 +27,7 @@ export default function MiniChart({
     const barWidth = (width - barGap * (data.length + 1)) / data.length
 
     return (
-        <section className="w-25rem mx-auto px-6 py-10">
+        <section className="w-28rem mx-auto px-6 py-10">
             <Card className="overflow-hidden">
                 <CardHeader>
                     <CardTitle className="text-xl">{title}</CardTitle>

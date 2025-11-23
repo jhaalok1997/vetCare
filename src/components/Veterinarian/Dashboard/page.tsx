@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tab";
 import { Button } from "@/components/ui/button";
 import { DashboardData } from "./types";
@@ -21,18 +22,13 @@ export default function VetDashboard() {
 
     const handleLogout = async () => {
         try {
-            const res = await fetch("/api/Auth/logout", {
-                method: "POST",
-                credentials: "include",
-            });
-            if (res.ok) {
-                try {
-                    localStorage.removeItem("user");
-                } catch {
-                    // ignore
-                }
-                window.location.href = "/";
+            await axios.post("/api/Auth/logout");
+            try {
+                localStorage.removeItem("user");
+            } catch {
+                // ignore
             }
+            window.location.href = "/";
         } catch (err) {
             console.error("Logout failed:", err);
         }
@@ -43,19 +39,8 @@ export default function VetDashboard() {
         setError(null);
 
         try {
-            const res = await fetch("/api/veterinarian/dashboard", {
-                credentials: "include",
-            });
-
-            if (!res.ok) {
-                const payload = (await res.json().catch(
-                    () => ({} as { error?: string })
-                )) as { error?: string };
-                throw new Error(payload.error || "Unable to fetch dashboard data.");
-            }
-
-            const payload: DashboardData = await res.json();
-            setDashboardData(payload);
+            const res = await axios.get("/api/veterinarian/dashboard");
+            setDashboardData(res.data);
         } catch (err) {
             console.error("Dashboard data fetch failed:", err);
             setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -67,16 +52,8 @@ export default function VetDashboard() {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const res = await fetch("/api/Auth/profile", {
-                    credentials: "include",
-                });
-
-                if (!res.ok) {
-                    router.push("/login");
-                    return;
-                }
-
-                const data = await res.json();
+                const res = await axios.get("/api/Auth/profile");
+                const data = res.data;
 
                 if (data.user?.role === "admin") {
                     router.push("/admin");
@@ -120,7 +97,7 @@ export default function VetDashboard() {
             <div className="flex items-start justify-between gap-4 mb-6">
                 <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
-                        <h1 className="text-3xl font-bold">Welcome back, {vetName}</h1>
+                        <h1 className="text-3xl font-bold">Welcome back, Dr. {vetName}</h1>
                         {isVerified && (
                             <span className="inline-flex items-center rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800 border border-emerald-200">
                                 Verified

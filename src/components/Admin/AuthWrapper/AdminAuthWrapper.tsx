@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 import { BlinkBlur } from "react-loading-indicators";
 
 interface AdminAuthWrapperProps {
@@ -16,23 +17,14 @@ export default function AdminAuthWrapper({ children }: AdminAuthWrapperProps) {
   useEffect(() => {
     const checkAdminAuth = async () => {
       try {
-        const res = await fetch("/api/Auth/profile", {
-          credentials: 'include' // Important: Include credentials for cookie
-        });
-        const userData = await res.json();
-
-        if (res.ok && userData.user) {
-          if (userData.user.role === "admin") {
-            setIsAdmin(true);
-            setLoading(false);
-            return; // Don't redirect if admin
-          }
-          // If not admin, redirect to home page
-          router.push("/");
-        } else {
-          // If not authenticated, redirect to login
-          router.push("/Auth/login");
+        const res = await axios.get("/api/Auth/profile");
+        if (res.data.user?.role === "admin") {
+          setIsAdmin(true);
+          setLoading(false);
+          return;
         }
+        // If not admin, redirect to home page
+        router.push("/");
       } catch (error) {
         console.error("Admin auth check failed:", error);
         router.push("/Auth/login");

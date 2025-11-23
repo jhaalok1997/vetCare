@@ -8,6 +8,7 @@ import VetMatchLog from "@/models/VetMatchLog";
 import DiagnosisReport from "@/models/DiagnosisReport";
 import ContactedUser from "@/models/ContactedUser";
 import AccountUser from "@/models/AccountUser";
+import Appointment from "@/models/Appointment";
 
 const SECRET = process.env.JWT_SECRET || "supersecret";
 
@@ -111,10 +112,12 @@ export async function GET(req: NextRequest) {
 
     const [
       uniquePatientIds,
-      todaysAppointmentsCount,
+      todaysMatchLogsCount,
       newConsultationsCount,
       matchLogs,
       recentDiagnosisReports,
+      newAppointments,
+      todaysNewAppointmentsCount,
     ] = await Promise.all([
       VetMatchLog.distinct<string>("animalType", vetMatchFilter),
       VetMatchLog.countDocuments({
@@ -135,7 +138,30 @@ export async function GET(req: NextRequest) {
         .sort({ createdAt: -1 })
         .limit(50)
         .lean(),
+      // Fetch appointments from the new Appointment model
+      Appointment.find({
+        $or: [
+          { veterinarian: vetProfileId },
+          // If no specific vet assigned, show all appointments
+          { veterinarian: { $exists: false } },
+        ],
+        status: { $in: ["scheduled", "confirmed", "rescheduled"] },
+      })
+        .sort({ scheduledFor: 1 })
+        .limit(50)
+        .lean(),
+      // Count today's appointments from new model
+      Appointment.countDocuments({
+        $or: [
+          { veterinarian: vetProfileId },
+          { veterinarian: { $exists: false } },
+        ],
+        status: { $in: ["scheduled", "confirmed", "rescheduled"] },
+        scheduledFor: { $gte: startOfToday, $lte: endOfToday },
+      }),
     ]);
+
+    const todaysAppointmentsCount = todaysMatchLogsCount + todaysNewAppointmentsCount;
 
     const diagnosisByAnimalType = new Map<string, (typeof recentDiagnosisReports)[number]>();
     recentDiagnosisReports.forEach((diagnosis) => {
@@ -146,7 +172,8 @@ export async function GET(req: NextRequest) {
       }
     });
 
-    const upcomingAppointments = matchLogs
+    // Process VetMatchLog appointments
+    const matchLogAppointments = matchLogs
       .filter((log) => {
         const appointmentDate = log.appointmentDate ?? log.timestamp;
         return appointmentDate && appointmentDate >= startOfToday;
@@ -156,7 +183,6 @@ export async function GET(req: NextRequest) {
         const bDate = (b.appointmentDate ?? b.timestamp ?? new Date()).getTime();
         return aDate - bDate;
       })
-      .slice(0, 6)
       .map((log) => {
         const animal = log.animalType as {
           _id?: mongoose.Types.ObjectId;
@@ -178,6 +204,28 @@ export async function GET(req: NextRequest) {
           status: log.status,
         };
       });
+
+    // Process new Appointment model appointments
+    const newModelAppointments = newAppointments
+      .filter((apt) => apt.scheduledFor >= startOfToday)
+      .map((apt) => ({
+        id: apt._id?.toString() ?? "",
+        patientName: apt.patientName,
+        species: apt.species,
+        condition: apt.reason,
+        urgency: apt.urgency,
+        scheduledFor: apt.scheduledFor,
+        status: apt.status,
+      }));
+
+    // Merge and sort all appointments
+    const upcomingAppointments = [...matchLogAppointments, ...newModelAppointments]
+      .sort((a, b) => {
+        const aDate = new Date(a.scheduledFor).getTime();
+        const bDate = new Date(b.scheduledFor).getTime();
+        return aDate - bDate;
+      })
+      .slice(0, 6);
 
     const patientSummaries: Array<{
       id: string;
