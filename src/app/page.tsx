@@ -33,13 +33,26 @@ export default function Home() {
       </div>
 
       {/* Content */}
-      <div className="flex-grow container mx-auto px-6 py-12">
-        <h2 className="text-5xl font-bold mb-4"></h2>
-        <p className="text-lg text-gray-700 font-bold font-serif mb-8">
-          We combine veterinary science and AI to make pet care smarter and research more insightful.
-          From early disease detection to better clinical decisions, our tools empower vets, students, and pet lovers alike.
-          Together, let us shape the future of animal health and compassionate care.
-        </p>
+      <div className="flex-grow w-full px-6 py-20 text-left md:text-center bg-gradient-to-b from-white to-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl md:text-5xl font-serif font-bold mb-8 text-gray-900 tracking-tight">
+            Where Compassion Meets Innovation
+          </h2>
+          <div className="max-w-4xl mx-auto space-y-6 text-left">
+            <p className="text-lg md:text-xl text-gray-600 leading-relaxed font-sans">
+              At Vet🐾Care, we believe that every pet deserves world-class healthcare. By bridging the gap between
+              <span className="text-emerald-600 font-semibold"> advanced veterinary science</span> and
+              <span className="text-blue-600 font-semibold"> cutting-edge AI technology</span>,
+              we are redefining what&apos;s possible in animal medicine.
+            </p>
+            <p className="text-lg md:text-xl text-gray-600 leading-relaxed font-sans">
+              From early disease detection algorithms that catch issues before they become critical, to streamlined practice management tools that let veterinarians focus on what they do best—healing. Our platform is designed to empower the entire veterinary ecosystem: doctors, students, and pet parents alike.
+            </p>
+            <p className="text-lg md:text-xl text-gray-600 leading-relaxed font-sans font-medium">
+              Join us in building a future where technology enhances the bond between humans and animals, ensuring a healthier, happier life for our furry companions.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Features */}
@@ -59,12 +72,20 @@ export default function Home() {
       </section>
 
       {/* Engagement widgets */}
-      <QuickActions />
-      <MiniChart />
-      <MiniCalendar />
+      <div className="max-w-7xl mx-auto px-6 pb-12 space-y-12">
+        <QuickActions />
+        <div className="grid md:grid-cols-2 gap-8 items-start">
+          <div className="w-full">
+            <MiniChart />
+          </div>
+          <div className="w-full">
+            <MiniCalendar />
+          </div>
+        </div>
+      </div>
 
       {/* FAQs */}
-      <main className="min-h-screen bg-gray-50">
+      <main className="bg-gray-50">
         <div className="py-10">
           <FAQ />
         </div>

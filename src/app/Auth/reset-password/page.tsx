@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
+import axios, { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -21,45 +22,36 @@ export default function ResetPasswordPage() {
 
         // Validation
         if (!token) {
-            setMessage("❌ Invalid reset token");
+            setMessage(" Invalid reset token");
             setIsLoading(false);
             return;
         }
 
         if (!newPassword || !confirmPassword) {
-            setMessage("❌ Please fill in all fields");
+            setMessage(" Please fill in all fields");
             setIsLoading(false);
             return;
         }
 
         if (newPassword.length < 5) {
-            setMessage("❌ Password must be at least 5 characters long");
+            setMessage(" Password must be at least 5 characters long");
             setIsLoading(false);
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            setMessage("❌ Passwords do not match");
+            setMessage(" Passwords do not match");
             setIsLoading(false);
             return;
         }
 
         try {
-            const res = await fetch("/api/Auth/reset-password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ token, newPassword }),
-            });
-
-            const data = await res.json();
-            if (res.ok) {
-                setMessage("✅ Password successfully reset!");
-                setTimeout(() => router.push("/login"), 2000);
-            } else {
-                setMessage(`❌ ${data.error}`);
-            }
+            await axios.post("/api/Auth/reset-password", { token, newPassword });
+            setMessage("✅ Password successfully reset!",);
+            setTimeout(() => router.push("/login"), 2000);
         } catch (error) {
-            setMessage("❌ An error occurred. Please try again.");
+            const err = error as AxiosError<{ error?: string }>;
+            setMessage(`❌ ${err.response?.data?.error || "An error occurred. Please try again."}`);
             console.error(error);
         }
 

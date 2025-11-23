@@ -27,6 +27,10 @@ export async function POST(req: Request) {
       );
     }
 
+    // Update lastLogin timestamp
+    user.lastLogin = new Date();
+    await user.save();
+
     // ✅ Payload includes tenantId & role
     // Admin gets longer session duration
     const tokenExpiry = user.role === "admin" ? "24h" : "1h";

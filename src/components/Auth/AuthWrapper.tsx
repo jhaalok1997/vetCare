@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios from "axios";
 import LoginForm from "./LoginForm";
 import SignupForm from "./SignUpForm";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,8 +20,8 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const res = await fetch("/api/Auth/profile");
-                setIsAuth(res.ok);
+                await axios.get("/api/Auth/profile");
+                setIsAuth(true);
             } catch {
                 setIsAuth(false);
             } finally {
@@ -40,7 +41,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
         return (
             <>
                 {/* Blurred background */}
-                <div className="relative min-h-screen">
+                <div className="relative min-h-screen" aria-hidden="true">
                     <div className="absolute inset-0 filter blur-sm pointer-events-none">
                         {children}
                     </div>
@@ -55,7 +56,7 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
                             className="absolute inset-0 flex items-center justify-center p-4"
                         >
                             <div className="w-full max-w-md">
-                                {showSignup? (
+                                {showSignup ? (
                                     <>
                                         <SignupForm onSuccess={() => setShowSignup(false)} />
                                         <p className="text-center mt-4 text-gray-600">
@@ -90,10 +91,10 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
         );
     }
 
-    return(
-     <>
-    
-       {children}
-    </>
+    return (
+        <>
+
+            {children}
+        </>
     )
 }

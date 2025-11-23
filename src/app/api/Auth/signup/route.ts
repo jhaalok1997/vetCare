@@ -2,10 +2,11 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { connectDB } from "@/lib/mongoDb";
 import User from "@/models/AccountUser";
+import VetProfile from "@/models/VetProfile";
 
 export async function POST(req: Request) {
   try {
-    const { username, email, password, role, tenantId } = await req.json();
+    const { username, email, password, role, tenantId, animalExpertise } = await req.json();
 
     if (!username || !email || !password) {
       return NextResponse.json(
@@ -35,6 +36,16 @@ export async function POST(req: Request) {
       role: role || "petOwner", // default role
       tenantId: tenantId || email, // fallback tenantId → could be clinic/org id later
     });
+
+    // If user is a vet, create a VetProfile
+    if (role === "vet") {
+      await VetProfile.create({
+        accountUser: newUser._id,
+        name: username, // Default name to username
+        animalExpertise: animalExpertise || [],
+        isActive: false, // Vets need verification
+      });
+    }
 
     return NextResponse.json(
       { message: "Signup successful", userId: newUser._id },

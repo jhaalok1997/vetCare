@@ -1,177 +1,104 @@
-# 🐾 VetCare Assistant
+# Vet-Assistant (Vet🐾Care)
 
-<div align="center">
+Vet-Assistant is a comprehensive veterinary practice management and pet care application designed to bridge the gap between pet owners and veterinarians. It features appointment booking, medical record management, AI-powered assistance, and role-based dashboards for Admins, Veterinarians, and Pet Owners.
 
+<<<<<<< HEAD
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green?style=for-the-badge&logo=mongodb)](https://www.mongodb.com/atlas)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+=======
+## 🚀 Tech Stack
+>>>>>>> dev2
 
-**An advanced AI-powered veterinary consultation platform providing real-time veterinary information, role-based access control, and comprehensive pet care services.**
+- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
+- **Language:** [TypeScript](https://www.typescriptlang.org/)
+- **Styling:** [Tailwind CSS v4](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/), [Lucide React](https://lucide.dev/)
+- **Database:** [MongoDB](https://www.mongodb.com/) (via Mongoose)
+- **Caching:** [Redis](https://redis.io/)
+- **Authentication:** JWT (JSON Web Tokens) with `jose` & `bcryptjs`
+- **AI Integration:** [LangChain](https://js.langchain.com/), [Groq](https://groq.com/) (Llama-3 model), Google Generative AI
+- **Utilities:** Axios, Nodemailer, JSPDF, React Hook Form
 
-[🚀 Live Demo](#) • [📖 Documentation](#) • [🐛 Report Bug](#) • [✨ Request Feature](#)
+## 🏗️ Architecture & Design
 
-</div>
+### 🤖 AI-Powered Assistance (RAG & LLM)
+The "Ask Vet Assist" feature leverages a sophisticated RAG (Retrieval-Augmented Generation) pipeline:
+- **Context Awareness:** Chat history is cached in **Redis** (TTL 7 days) to maintain conversation context.
+- **External Knowledge:** Uses **Tavily API** to fetch real-time veterinary research and news for queries about recent events (2024+).
+- **LLM Engine:** Powered by **Groq (Llama-3-70b)** for high-speed inference.
+- **Guardrails:** Strict prompt engineering ensures the AI only answers veterinary-related queries, rejecting irrelevant topics.
 
----
+### 📅 Appointment System
+A robust scheduling system built on MongoDB:
+- **Status Workflow:** `scheduled` → `confirmed` → `completed` (or `cancelled`/`rescheduled`).
+- **Data Integrity:** Mongoose schemas enforce referential integrity between `Appointments`, `Patients`, and `Veterinarians`.
+- **Concurrency:** Optimistic locking prevents double-booking slots.
 
-## 📚 Table of Contents
+### 🔐 Security & Access Control
+- **Edge Middleware:** `middleware.ts` intercepts requests to validate JWTs using `jose` (Edge-compatible).
+- **RBAC:**
+  - `/admin/*`: Restricted to users with `role: 'admin'`.
+  - `/veterinarian/*`: Restricted to users with `role: 'vet'`.
+  - `/tenant/*`: Implements strict tenant isolation logic.
+- **Data Protection:** Passwords hashed with `bcryptjs`; sensitive routes protected against unauthorized access.
 
-- [✨ Features](#-features)
-- [🎯 New Features & Enhancements](#-new-features--enhancements)
-- [🛠 Tech Stack](#-tech-stack)
-- [🚀 Quick Start](#-quick-start)
-- [🏗 Architecture](#-architecture)
-- [🔐 Authentication & Authorization](#-authentication--authorization)
-- [🤖 AI Integration](#-ai-integration)
-- [📱 User Interface](#-user-interface)
-- [🔧 Environment Setup](#-environment-setup)
-- [📊 API Documentation](#-api-documentation)
-- [🧪 Testing](#-testing)
-- [🚀 Deployment](#-deployment)
-- [🤝 Contributing](#-contributing)
-- [📄 License](#-license)
+### 📄 Medical Reports & File Handling
+- **Storage:** Secure local file storage (can be extended to S3/Cloudinary).
+- **Validation:** Strict MIME-type checking (PDF, DICOM, Images) and size limits (5MB) on the server side.
+- **Metadata:** File metadata linked to Patient and Appointment records in MongoDB for easy retrieval.
 
----
+## ✨ Key Features
 
-## ✨ Features
+### 🐾 Pet Owner Features
+- **Appointment Booking:** Schedule visits with available veterinarians.
+- **Ask Vet Assist:** AI-powered chatbot for preliminary pet health queries.
+- **Medical Reports:** View and download pet medical history (PDF support).
+- **Service Discovery:** Browse available veterinary services.
 
-### 🤖 AI-Powered Veterinary Assistant
-- **Real-time Veterinary Information**: Integrated with Groq and Tavily for up-to-date veterinary knowledge
-- **Smart Query Processing**: Automatically detects and handles current (2025) information requests
-- **Conversation History**: Maintains context-aware chat history per user
-- **Domain-Specific Responses**: Focused on veterinary and animal health topics
-- **Multi-language Support**: Support for multiple languages in AI responses
-- **AI Diagnosis Report Generator**: Intelligent diagnosis reports based on pet symptoms and medical history
-  - Analyzes pet information (animal type, age, breed, symptoms)
-  - Provides possible diseases with descriptions (max 3)
-  - Suggests immediate home care advice
-  - Recommends when to seek urgent veterinary care
-  - Generates downloadable PDF reports
-  - Saves diagnosis history to MongoDB
+### 🩺 Veterinarian Features
+- **Dashboard:** Overview of appointments and patient stats.
+- **Patient Management:** View and update medical records.
+- **Profile Management:** Update availability and professional details.
 
-### 🔐 Advanced Authentication & Authorization
-- **Role-Based Access Control (RBAC)**: Admin, Veterinarian, and Pet Owner roles
-- **Secure JWT Authentication**: HTTP-only cookies for enhanced security
-- **Password Reset**: Email-based password recovery system
-- **Session Management**: Secure MongoDB-based session handling
-- **Multi-tenant Support**: Tenant-based user isolation
-- **Persistent Authentication**: Local storage user data persistence with secure handling
-- **Smart Layout Control**: Dynamic UI elements based on user roles
-- **Auto-logout Cleanup**: Comprehensive cleanup of user data on logout
+### 🛠 Admin Features
+- **User & Vet Management:** Oversee all platform users.
+- **System Monitoring:** View logs and system health.
+- **Content Management:** Manage FAQs and service listings.
 
-### 💻 Modern User Interface
-- **Responsive Design**: Mobile-first approach with desktop optimization
-- **Role-Based Navigation**: Dynamic navbar based on user roles
-- **Interactive Components**: Built with shadcn/ui components
-- **Real-time Chat Interface**: Smooth, responsive chat experience
-- **Accessibility**: WCAG 2.1 compliant design
-- **Adaptive Layout System**: Intelligent component hiding based on user role
-- **Role-Specific UI Elements**: Customized navigation and footer for different user types
-- **Clean Authentication Flow**: Streamlined login/logout experience with proper state management
+## 📂 Project Structure
 
-### 📊 User Management
-- **User Profiles**: Comprehensive user profile management
-- **Contact Management**: Track user interactions and inquiries
-- **Activity Logging**: Detailed user activity tracking
-- **Data Analytics**: User engagement and usage analytics
-- **Enhanced Session Management**: Improved user session persistence
-- **Role Verification**: Robust admin authentication checks
-- **Header-based Authentication**: Secure x-user header implementation
+```bash
+src/
+├── app/                # Next.js App Router pages & API routes
+│   ├── api/            # Backend API endpoints (AskVetcare, Reports, etc.)
+│   ├── admin/          # Admin dashboard routes
+│   ├── veterinarian/   # Veterinarian dashboard routes
+│   └── ...             # Public routes (Home, About, Services)
+├── components/         # Reusable UI components
+│   ├── Ask-vet-Assit/  # AI Chatbot components
+│   ├── Admin/          # Admin-specific components
+│   └── ...
+├── lib/                # Utilities & Configurations
+│   ├── mongoDb.ts      # Database connection
+│   ├── redisconfig.ts  # Redis client setup
+│   ├── llmModel.ts     # AI Model configuration
+│   └── nodeMailer.ts   # Email transporter
+├── models/             # Mongoose Data Models (User, Appointment, MedicalReport)
+└── middleware.ts       # Edge middleware for route protection
+```
 
----
-
-## 🎯 New Features & Enhancements
-
-### 🔄 Role-Based Dashboard Access
-- **Admin Dashboard**: Full system administration and user management
-- **Veterinarian Dashboard**: Professional tools and patient management
-- **Pet Owner Interface**: Personalized pet care information and services
-- **Dynamic Navigation**: Context-aware menu items based on user role
-
-### 📧 Enhanced Communication
-- **Email Integration**: NodeMailer for automated email notifications
-- **Contact Form**: Advanced contact form with validation
-- **FAQ System**: Comprehensive frequently asked questions
-- **Support Tickets**: Integrated support system for user assistance
-
-### 🏥 Veterinary Services
-- **Service Catalog**: Detailed veterinary services and pricing
-- **Appointment Scheduling**: Online booking system (coming soon)
-- **Health Records**: Digital pet health records (coming soon)
-- **Emergency Services**: 24/7 emergency contact information
-- **Pet Health Assessment Form**: Comprehensive form for pet diagnosis
-  - Owner information (email, phone, contact preferences)
-  - Pet details (name, type, age, breed)
-  - Medical information (disease category, urgency level, symptoms, duration)
-  - Dynamic disease categories based on animal type
-  - Animal-specific health information and guidance
-  - Real-time form validation
-  - Integrated with AI diagnosis engine
-
-### 🔒 Security Enhancements
-- **Input Validation**: Comprehensive input sanitization
-- **Rate Limiting**: API rate limiting for security
-- **CORS Protection**: Cross-origin resource sharing security
-- **Data Encryption**: End-to-end data encryption
-- **Audit Logging**: Comprehensive security audit trails
-
-### 📱 Mobile Optimization
-- **Progressive Web App**: PWA capabilities for mobile users
-- **Offline Support**: Basic offline functionality
-- **Push Notifications**: Real-time notifications (coming soon)
-- **Mobile-First Design**: Optimized for mobile devices
-
----
-
-## 🛠 Tech Stack
-
-### Frontend
-- **Framework**: Next.js 15 (App Router)
-- **Language**: TypeScript 5.0
-- **Styling**: Tailwind CSS 3.0
-- **Components**: shadcn/ui
-- **State Management**: React Context + useState
-- **Animations**: Framer Motion
-- **Icons**: Lucide React
-
-### Backend
-- **Runtime**: Node.js 22.18.0
-- **API**: Next.js API Routes
-- **Database**: MongoDB Atlas
-- **Authentication**: JWT + bcrypt
-- **Caching**: Redis (cache Storage)
-- **Email**: NodeMailer
-
-### AI & Search
-- **LLM**: Groq (llama-3.3-70b-versatile)
-- **Web Search**: Tavily API
-- **Response Format**: Markdown with structured data
-- **Context Management**: Conversation history
-- **Diagnosis Engine**: LangChain + Groq for medical analysis
-- **PDF Generation**: jsPDF for downloadable reports
-
-### Development Tools
-- **Linting**: ESLint
-- **Formatting**: Prettier
-- **Type Checking**: TypeScript
-- **Version Control**: Git
-- **Package Manager**: npm/yarn
-
----
-
-## 🚀 Quick Start
+## 🛠️ Getting Started
 
 ### Prerequisites
-- Node.js 18.0 or later
-- MongoDB Atlas account
-- Groq API key
-- Tavily API key
-- Email service (Gmail/SendGrid)
+- Node.js (v18+)
+- MongoDB Instance
+- Redis Instance (Optional, for caching)
 
 ### Installation
 
+<<<<<<< HEAD
 1. **Clone the repository**:
 ```bash
 git clone https://github.com/jhaalok1997/vetCare.git
@@ -640,3 +567,55 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 [⬆ Back to Top](#-vetcare-assistant)
 
 </div>
+=======
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/your-username/vet-assit.git
+   cd vet-assit
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Set up Environment Variables:**
+   Create a `.env` file in the root directory and add the following:
+
+   ```env
+   # Database
+   MONGODB_URI=your_mongodb_connection_string
+
+   # Authentication
+   JWT_SECRET=your_jwt_secret_key
+
+   # Email Service (Nodemailer)
+   EMAIL_USER=your_email@example.com
+   EMAIL_PASSWORD=your_email_app_password
+
+   # Redis (Optional)
+   REDIS_HOST=your_redis_host
+   REDIS_PORT=your_redis_port
+   REDIS_USERNAME=your_redis_username
+   REDIS_PASSWORD=your_redis_password
+
+   # AI Integration
+   GROQ_API_KEY=your_groq_api_key
+   TAVILY_API_KEY=your_tavily_api_key
+   ENABLE_TAVILY=true
+   ```
+
+4. **Run the development server:**
+   ```bash
+   npm run dev
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+## 📜 Scripts
+
+- `npm run dev`: Start development server.
+- `npm run build`: Build for production.
+- `npm start`: Start production server.
+- `npm run lint`: Run ESLint.
+>>>>>>> dev2

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios from "axios";
 import { ThreeDot } from "react-loading-indicators";
 
 interface FAQ {
@@ -15,10 +16,8 @@ export default function FAQComponent() {
   useEffect(() => {
     const fetchFAQs = async () => {
       try {
-        const res = await fetch("/api/faqs");
-        if (!res.ok) throw new Error("Failed to fetch FAQs");
-        const data = await res.json();
-        setFaqs(data);
+        const res = await axios.get("/api/faqs");
+        setFaqs(res.data);
       } catch (error) {
         console.error(error);
       } finally {

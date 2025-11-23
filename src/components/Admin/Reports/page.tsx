@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios, { AxiosError } from "axios";
 import {
     DocumentTextIcon,
     ChartBarIcon,
@@ -63,29 +64,23 @@ export default function ReportsPage() {
                     return;
                 }
 
-                const res = await fetch(`/api/admin/reports?range=${dateRange}`, {
+                const res = await axios.get(`/api/admin/reports?range=${dateRange}`, {
                     headers: {
                         'x-user': currentUser,
                         'Content-Type': 'application/json',
                     },
                 });
-
-                if (!res.ok) {
-                    const errorData = await res.json();
-                    throw new Error(errorData.error || 'Failed to fetch reports');
-                }
-
-                const data = await res.json();
-                setReportData(data.summary || {
+                setReportData(res.data.summary || {
                     diagnoses: { total: 0, thisMonth: 0, lastMonth: 0 },
                     consultations: { total: 0, thisMonth: 0, lastMonth: 0 },
                     users: { newThisMonth: 0, activeThisMonth: 0 },
                     vetMatches: { total: 0, thisMonth: 0 }
                 });
-                setRecentDiagnoses(data.recentDiagnoses || []);
+                setRecentDiagnoses(res.data.recentDiagnoses || []);
             } catch (error) {
                 console.error("Failed to fetch reports:", error);
-                setError(error instanceof Error ? error.message : 'An error occurred');
+                const err = error as AxiosError<{ error?: string }>;
+                setError(err.response?.data?.error || 'An error occurred');
             } finally {
                 setLoading(false);
             }

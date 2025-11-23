@@ -38,9 +38,13 @@ const UserSchema = new Schema(
       type: Date,
       default: null,
     },
+    lastLogin: {
+      type: Date,
+      default: Date.now,
+    },
   },
   { timestamps: true }
 );
 
-const User = models.User || model("User", UserSchema);
-export default User;
+const AccountUser = models.User || model("User", UserSchema);
+export default AccountUser;

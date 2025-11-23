@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { motion, useAnimation } from "framer-motion";
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 // Default testimonials at module scope to avoid hook deps
 const defaultTestimonials: Array<{ name: string; role: string; feedback: string }> = [
@@ -187,9 +188,8 @@ export default function AboutPage() {
         const fetchTestimonials = async () => {
             try {
                 setIsLoadingTestimonials(true);
-                const response = await fetch("/api/testimonials");
-                const data = await response.json();
-                setTestimonials(buildTestimonials(data));
+                const response = await axios.get("/api/testimonials");
+                setTestimonials(buildTestimonials(response.data));
             } catch (error) {
                 console.error("Failed to fetch testimonials:", error);
                 setTestimonials(buildTestimonials([]));

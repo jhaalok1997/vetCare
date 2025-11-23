@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios from "axios";
 import {
     UsersIcon,
     UserGroupIcon,
@@ -76,14 +77,10 @@ export default function AdminDashboard() {
         const fetchDashboardData = async () => {
             try {
                 const currentUser = localStorage.getItem('user');
-                const res = await fetch("/api/admin/dashboard", {
-                    credentials: 'include',
+                const res = await axios.get("/api/admin/dashboard", {
                     headers: currentUser ? { 'x-user': currentUser } : {}
                 });
-                if (res.ok) {
-                    const dashboardData = await res.json();
-                    setData(dashboardData);
-                }
+                setData(res.data);
             } catch (error) {
                 console.error("Failed to fetch dashboard data:", error);
             } finally {

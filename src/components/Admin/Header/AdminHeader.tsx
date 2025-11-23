@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+//import { useRouter } from "next/navigation";
+import axios from "axios";
 import { Bars3Icon, BellIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 
 interface User {
@@ -19,17 +20,13 @@ interface AdminHeaderProps {
 
 export default function AdminHeader({ user, toggleSidebar }: AdminHeaderProps) {
     const [isOpen, setIsOpen] = useState(false); // profile dropdown only
-    const router = useRouter();
+    // const router = useRouter();
 
     const handleLogout = async () => {
         try {
-            const res = await fetch("/api/Auth/logout", {
-                method: "POST",
-            });
-            if (res.ok) {
-                try { localStorage.removeItem('user'); } catch { }
-                router.push("/login");
-            }
+            await axios.post("/api/Auth/logout");
+            try { localStorage.removeItem('user'); } catch { }
+            window.location.href = "/";
         } catch (error) {
             console.error("Logout failed:", error);
         }
@@ -51,7 +48,7 @@ export default function AdminHeader({ user, toggleSidebar }: AdminHeaderProps) {
                             Welcome back ,
                             <span className="text-sm font-bold bg-blue-500 p-2 rounded-xl"> {user ? user.username : "Admin"}</span>
                         </h2>
-                        <p className="text-sm mt-3 font-bold lg:text-lg text-gray-700">Admin Dashboard</p>
+                        {/* // <p className="text-sm mt-3 font-bold lg:text-lg text-gray-700">Admin Dashboard</p> */}
                     </div>
                 </div>
 

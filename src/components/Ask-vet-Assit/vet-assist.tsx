@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import axios from "axios";
 import { Button } from "@/components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -26,21 +27,15 @@ export default function AskVetAI() {
     setUserId(uid);
   }, []);
 
-  // 🔄 Load chat history from Redis
+  //  Load chat history from Redis
   useEffect(() => {
     if (!userId) return;
 
     const fetchChatHistory = async () => {
       try {
-        const res = await fetch("/api/getUserChatHistory", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId }),
-        });
-
-        const data = await res.json();
-        if (data.history && Array.isArray(data.history)) {
-          setMessages(data.history);
+        const res = await axios.post("/api/getUserChatHistory", { userId });
+        if (res.data.history && Array.isArray(res.data.history)) {
+          setMessages(res.data.history);
         }
       } catch (err) {
         console.error("⚠️ Failed to load chat history:", err);
@@ -50,7 +45,7 @@ export default function AskVetAI() {
     fetchChatHistory();
   }, [userId]);
 
-  // ❌ Clear chat (local view only — Redis history remains)
+  //  Clear chat (local view only — Redis history remains)
   const handleClose = () => {
     setOpen(false);
     setMessages([]);
@@ -62,13 +57,8 @@ export default function AskVetAI() {
     setLoading(true);
 
     try {
-      const res = await fetch("/api/AskVetcare-button", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ question, userId }),
-      });
-
-      const data = await res.json();
+      const res = await axios.post("/api/AskVetcare-button", { question, userId });
+      const data = res.data;
 
       if (data.history && Array.isArray(data.history)) {
         setMessages(data.history);
@@ -152,8 +142,8 @@ export default function AskVetAI() {
                 <div
                   key={idx}
                   className={`px-3 py-2 rounded-2xl shadow-sm max-w-[90%] ${msg.role === "user"
-                      ? "self-end bg-green-600 text-white"
-                      : "self-start bg-green-50 border border-green-200 text-green-900"
+                    ? "self-end bg-green-600 text-white"
+                    : "self-start bg-green-50 border border-green-200 text-green-900"
                     }`}
                 >
                   {msg.content}

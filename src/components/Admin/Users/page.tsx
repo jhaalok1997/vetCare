@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import axios from "axios";
 import {
     UsersIcon,
     EyeIcon,
@@ -49,7 +50,6 @@ export default function ActiveUsersPage() {
     useEffect(() => {
         const fetchUsers = async () => {
             try {
-                // Get current user from localStorage and validate
                 const rawUser = localStorage.getItem('user');
                 if (!rawUser) {
                     alert('User not authenticated. Please log in as admin.');
@@ -59,7 +59,7 @@ export default function ActiveUsersPage() {
                 let userObj;
                 try {
                     userObj = JSON.parse(rawUser);
-                } catch  {
+                } catch {
                     alert('Corrupted user data. Please log in again.');
                     setLoading(false);
                     return;
@@ -70,20 +70,14 @@ export default function ActiveUsersPage() {
                     return;
                 }
 
-                const res = await fetch("/api/admin/users", {
+                const res = await axios.get("/api/admin/users", {
                     headers: {
                         'x-user': JSON.stringify(userObj),
                         'Content-Type': 'application/json',
                     },
                 });
-                if (res.ok) {
-                    const data = await res.json();
-                    setUsers(data.users);
-                    setStats(data.stats);
-                } else {
-                    const errorData = await res.json();
-                    alert(errorData.error || 'Failed to fetch users');
-                }
+                setUsers(res.data.users);
+                setStats(res.data.stats);
             } catch (error) {
                 console.error("Failed to fetch users:", error);
                 alert('An error occurred while fetching users.');
@@ -122,10 +116,27 @@ export default function ActiveUsersPage() {
         );
     };
 
+    const getRelativeTime = (date: string) => {
+        const now = new Date();
+        const loginDate = new Date(date);
+        const diffMs = now.getTime() - loginDate.getTime();
+
+        const diffMins = Math.floor(diffMs / 60000);
+        const diffHours = Math.floor(diffMs / 3600000);
+        const diffDays = Math.floor(diffMs / 86400000);
+
+        if (diffMins < 1) return 'Just now';
+        if (diffMins < 60) return `${diffMins} min ago`;
+        if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+        return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+    };
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500">
+                    <p className="text-sm font-bold text-gray-900">Loading Please Wait for a While...</p>
+                </div>
             </div>
         );
     }
@@ -271,7 +282,7 @@ export default function ActiveUsersPage() {
                                         <div className="flex items-center mt-1">
                                             <ClockIcon className="h-4 w-4 text-gray-400 mr-1" />
                                             <p className="text-xs text-gray-500">
-                                                Last login: {new Date(user.lastLogin).toLocaleDateString()}
+                                                Last login: {getRelativeTime(user.lastLogin)}
                                             </p>
                                         </div>
                                     </div>

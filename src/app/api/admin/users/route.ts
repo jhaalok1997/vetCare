@@ -19,15 +19,15 @@ export async function GET(req: Request) {
 
     // Get all users with their details
     const users = await User.find()
-      .select("username email role createdAt tenantId")
+      .select("username email role createdAt tenantId lastLogin")
       .sort({ createdAt: -1 });
 
-    // Add activity status (simplified - consider user as active if created in last 7 days)
+    // Add activity status (consider user as active if logged in within last 7 days)
     const usersWithActivity = users.map((user) => ({
       ...user.toObject(),
-      lastLogin: user.createdAt, // Using createdAt as lastLogin for now
+      lastLogin: user.lastLogin || user.createdAt, // Fallback to createdAt if lastLogin not set
       isActive:
-        new Date(user.createdAt) >
+        new Date(user.lastLogin || user.createdAt) >
         new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
     }));
 

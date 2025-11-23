@@ -2,6 +2,7 @@
 "use client";
 
 import { useState } from "react";
+import axios, { AxiosError } from "axios";
 import { Button } from "@/components/ui/button";
 
 export default function Contact() {
@@ -22,17 +23,7 @@ export default function Contact() {
     setStatus({ type: null, message: "" });
 
     try {
-      const res = await fetch("/api/ContactedUser", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData)
-      });
-
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || "Something went wrong");
-      }
+      await axios.post("/api/ContactedUser", formData);
 
       setStatus({
         type: "success",
@@ -40,9 +31,10 @@ export default function Contact() {
       });
       setFormData({ Name: "", email: "", message: "" });
     } catch (error) {
+      const err = error as AxiosError<{ error?: string }>;
       setStatus({
         type: "error",
-        message: error instanceof Error ? error.message : "Failed to send message"
+        message: err.response?.data?.error || err.message || "Failed to send message"
       });
     } finally {
       setIsLoading(false);
@@ -106,4 +98,4 @@ export default function Contact() {
       </form>
     </div>
   );
- } 
+} 

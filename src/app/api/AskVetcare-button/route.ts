@@ -48,7 +48,7 @@ async function setUserHistory(userId: string, history: ChatMessage[]) {
 const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY || "" });
 const ENABLE_TAVILY = process.env.ENABLE_TAVILY === "true";
 
-console.log(`🔍 Tavily Status: ${ENABLE_TAVILY ? "Enabled" : "Disabled"}`);
+// console.log(`🔍 Tavily Status: ${ENABLE_TAVILY ? "Enabled" : "Disabled"}`);
 
 const vetKeywords = [
   "veterinary", "vet", "animal health", "diseases", "b.v.sc", "m.v.sc",
