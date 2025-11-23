@@ -37,7 +37,7 @@ export async function POST(req: Request) {
     await user.save();
 
     // Create reset URL
-    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`;
+    const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/Auth/reset-password?token=${resetToken}`;
 
     // Send email
     await transporter.sendMail(mailOptions(email, resetUrl));

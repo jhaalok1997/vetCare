@@ -1,6 +1,6 @@
 "use client"
 import { Button } from "@/components/ui/button"
-import { Calendar, Stethoscope, Upload, ArrowRight } from "lucide-react"
+import { Calendar, Upload, ArrowRight } from "lucide-react"
 import { useState } from "react"
 import BookAppointmentModal from "./BookAppointmentModal"
 import UploadReportModal from "./UploadReportModal"
@@ -13,9 +13,7 @@ export default function QuickActions() {
         setShowBookingModal(true)
     }
 
-    const handleFindVet = () => {
-        window.location.href = "/find-vet"
-    }
+
 
     const handleUploadReport = () => {
         setShowUploadModal(true)

@@ -43,7 +43,7 @@ export async function GET(req: Request) {
 
     // Log connection status and counts for debugging
     // console.log("Database connection status: Connected");
-    const userCount = await User.countDocuments();
+    // const userCount = await User.countDocuments();
     // console.log("Total users in database:", userCount);
 
     // Get basic user statistics

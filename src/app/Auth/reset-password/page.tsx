@@ -22,32 +22,32 @@ export default function ResetPasswordPage() {
 
         // Validation
         if (!token) {
-            setMessage("❌ Invalid reset token");
+            setMessage(" Invalid reset token");
             setIsLoading(false);
             return;
         }
 
         if (!newPassword || !confirmPassword) {
-            setMessage("❌ Please fill in all fields");
+            setMessage(" Please fill in all fields");
             setIsLoading(false);
             return;
         }
 
         if (newPassword.length < 5) {
-            setMessage("❌ Password must be at least 5 characters long");
+            setMessage(" Password must be at least 5 characters long");
             setIsLoading(false);
             return;
         }
 
         if (newPassword !== confirmPassword) {
-            setMessage("❌ Passwords do not match");
+            setMessage(" Passwords do not match");
             setIsLoading(false);
             return;
         }
 
         try {
-            const res = await axios.post("/api/Auth/reset-password", { token, newPassword });
-            setMessage("✅ Password successfully reset!");
+            await axios.post("/api/Auth/reset-password", { token, newPassword });
+            setMessage("✅ Password successfully reset!",);
             setTimeout(() => router.push("/login"), 2000);
         } catch (error) {
             const err = error as AxiosError<{ error?: string }>;

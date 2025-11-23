@@ -66,10 +66,10 @@ export default function VetProfilesPage() {
                 }
             );
 
-            // Optimistic UI update
+            // Update UI with server response
             setVetProfiles((prev) =>
                 prev.map((vet) =>
-                    vet._id === vetId ? { ...vet, isVerified: !currentStatus } : vet
+                    vet._id === vetId ? { ...vet, isVerified: res.data.data.isVerified } : vet
                 )
             );
 

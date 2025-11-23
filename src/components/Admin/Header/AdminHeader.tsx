@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+//import { useRouter } from "next/navigation";
 import axios from "axios";
 import { Bars3Icon, BellIcon, UserCircleIcon } from "@heroicons/react/24/outline";
 
@@ -20,7 +20,7 @@ interface AdminHeaderProps {
 
 export default function AdminHeader({ user, toggleSidebar }: AdminHeaderProps) {
     const [isOpen, setIsOpen] = useState(false); // profile dropdown only
-    const router = useRouter();
+    // const router = useRouter();
 
     const handleLogout = async () => {
         try {

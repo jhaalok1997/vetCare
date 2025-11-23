@@ -23,7 +23,7 @@ interface State {
 
 // Define action types
 type Action =
-  | { type: "SET_FIELD"; field: keyof State; value: any }
+  | { type: "SET_FIELD"; field: keyof State; value: string | boolean | string[] }
   | { type: "TOGGLE_ANIMAL_EXPERTISE"; animal: string }
   | { type: "SET_MESSAGE"; message: string }
   | { type: "SET_LOADING"; isLoading: boolean }
@@ -98,7 +98,7 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
     dispatch({ type: "SET_LOADING", isLoading: true });
 
     try {
-      const res = await axios.post("/api/Auth/signup", { username, email, password, role, tenantId, animalExpertise });
+      await axios.post("/api/Auth/signup", { username, email, password, role, tenantId, animalExpertise });
       dispatch({ type: "SET_MESSAGE", message: "✅ Signup successful! Please login." });
       if (onSuccess) onSuccess();
     } catch (error) {

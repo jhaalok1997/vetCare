@@ -6,7 +6,7 @@ import {
     BellIcon,
     ShieldCheckIcon,
     EnvelopeIcon,
-    UserCircleIcon,
+    // UserCircleIcon,
     KeyIcon,
     CheckCircleIcon
 } from "@heroicons/react/24/outline";
