@@ -86,9 +86,13 @@ export default function VetDashboard() {
 
     if (authLoading || (dataLoading && !dashboardData)) {
         return (
-            <div className="flex items-center justify-center h-screen">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
-            </div>
+            <>
+                <div className="flex items-center justify-center h-screen">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-500"></div>
+
+                </div>
+                <p className="text-sm font-bold text-gray-900">Loading Please Wait for a While...</p>
+            </>
         );
     }
 

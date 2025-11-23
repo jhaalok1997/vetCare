@@ -48,7 +48,7 @@ export default function AdminHeader({ user, toggleSidebar }: AdminHeaderProps) {
                             Welcome back ,
                             <span className="text-sm font-bold bg-blue-500 p-2 rounded-xl"> {user ? user.username : "Admin"}</span>
                         </h2>
-                        <p className="text-sm mt-3 font-bold lg:text-lg text-gray-700">Admin Dashboard</p>
+                        {/* // <p className="text-sm mt-3 font-bold lg:text-lg text-gray-700">Admin Dashboard</p> */}
                     </div>
                 </div>
 

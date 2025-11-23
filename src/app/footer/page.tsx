@@ -51,7 +51,7 @@ export default function Footer() {
         {/* Quick Links */}
         <div className="flex flex-row gap-10 md:flex-row md:gap-12 lg:gap-24">
           <div>
-            <h3 className="text-xl font-bold w-24 mb-4">Quick Links</h3>
+            <h3 className="text-xl font-bold w-32 mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm flex flex-col">
               <li><Link href="/" className="hover:text-yellow-300">Home</Link></li>
               <li><Link href="/about" className="hover:text-yellow-300">About</Link></li>

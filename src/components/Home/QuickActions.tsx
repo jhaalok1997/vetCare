@@ -20,15 +20,15 @@ export default function QuickActions() {
     }
 
     return (
-        <section className="max-w-full mx-auto px-2 py-5">
-            <div className="mb-8">
-                <h3 className="text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent">
+        <section className="w-full max-w-7xl mx-auto px-4 py-8">
+            <div className="mb-8 text-center">
+                <h3 className="text-3xl font-extrabold font-sans tracking-tight bg-gradient-to-r from-gray-900 to-gray-600 bg-clip-text text-transparent sm:text-4xl">
                     Quick Actions
                 </h3>
-                <p className="text-gray-600 mt-2">Get started with the most common tasks</p>
+                <p className="text-gray-600 mt-2 text-lg font-medium">Get started with the most common tasks</p>
             </div>
 
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-8 grid-cols-1 md:grid-cols-2">
                 <ActionCard
                     title="Book Appointment"
                     description="Schedule a visit with a veterinarian"
