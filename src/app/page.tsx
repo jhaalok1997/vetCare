@@ -43,7 +43,7 @@ export default function Home() {
               At Vet🐾Care, we believe that every pet deserves world-class healthcare. By bridging the gap between
               <span className="text-emerald-600 font-semibold"> advanced veterinary science</span> and
               <span className="text-blue-600 font-semibold"> cutting-edge AI technology</span>,
-              we are redefining what's possible in animal medicine.
+              we are redefining what&apos;s possible in animal medicine.
             </p>
             <p className="text-lg md:text-xl text-gray-600 leading-relaxed font-sans">
               From early disease detection algorithms that catch issues before they become critical, to streamlined practice management tools that let veterinarians focus on what they do best—healing. Our platform is designed to empower the entire veterinary ecosystem: doctors, students, and pet parents alike.
