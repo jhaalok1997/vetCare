@@ -36,7 +36,7 @@ Ends with a technical or professional insight (clinical/industry).
   `;
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); //  llm Model
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }); //  llm Model
     const result = await model.generateContent(prompt);
     let text = result.response.text();
 
@@ -53,8 +53,14 @@ Ends with a technical or professional insight (clinical/industry).
   } catch (err) {
     console.error("❌ Failed to generate FAQs:", err);
     return [
-      { question: "What is veterinary science?", answer: "It is the study of animal health and medical care." },
-      { question: "How long does a veterinary degree take?", answer: "It usually takes 5–6 years to complete." },
+      {
+        question: "What is veterinary science?",
+        answer: "It is the study of animal health and medical care.",
+      },
+      {
+        question: "How long does a veterinary degree take?",
+        answer: "It usually takes 5–6 years to complete.",
+      },
     ];
   }
 }
@@ -76,7 +82,12 @@ export async function GET() {
   } catch (error: unknown) {
     console.error("❌ API error:", error);
     return NextResponse.json(
-      [{ question: "Service temporarily unavailable", answer: "Please try again later." }],
+      [
+        {
+          question: "Service temporarily unavailable",
+          answer: "Please try again later.",
+        },
+      ],
       { status: 500 }
     );
   }
