@@ -6,6 +6,7 @@ import LoginForm from "./LoginForm";
 import SignupForm from "./SignUpForm";
 import { motion, AnimatePresence } from "framer-motion";
 import { Atom } from "react-loading-indicators"
+import { usePathname } from "next/navigation";
 
 
 interface AuthWrapperProps {
@@ -16,8 +17,15 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
     const [isAuth, setIsAuth] = useState(false);
     const [showSignup, setShowSignup] = useState(false);
     const [loading, setLoading] = useState(true);
+    const pathname = usePathname();
+    const isAuthRoute = pathname?.startsWith("/Auth");
 
     useEffect(() => {
+        if (isAuthRoute) {
+            setLoading(false);
+            setIsAuth(false);
+            return;
+        }
         const checkAuth = async () => {
             try {
                 await axios.get("/api/Auth/profile");
@@ -29,12 +37,16 @@ export default function AuthWrapper({ children }: AuthWrapperProps) {
             }
         };
         checkAuth();
-    }, []);
+    }, [isAuthRoute]);
 
     if (loading) {
         return <div className="min-h-screen flex items-center justify-center">
-            <Atom color="#32cd32" size="large" text="Loading" textColor="#af5151" />
+            <Atom color="#32cd32" size="large" text="Loading...." textColor="#af5151" />
         </div>;
+    }
+
+    if (isAuthRoute) {
+        return <>{children}</>;
     }
 
     if (!isAuth) {

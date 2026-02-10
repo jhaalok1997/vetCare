@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  reactCompiler: true,
   webpack: (config) => {
     // Alias node-domexception to false so Webpack ignores it
     config.resolve.alias['node-domexception'] = false;
