@@ -90,6 +90,20 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
       return;
     }
 
+    if (!tenantId) {
+      dispatch({ type: "SET_MESSAGE", message: "❌ Tenant ID is required" });
+      return;
+    }
+
+    const tenantIdPattern = /^[a-zA-Z0-9]{3,32}$/;
+    if (!tenantIdPattern.test(tenantId)) {
+      dispatch({
+        type: "SET_MESSAGE",
+        message: "❌ Tenant ID must be 3–32 characters and alphanumeric only",
+      });
+      return;
+    }
+
     if (role === "vet" && animalExpertise.length === 0) {
       dispatch({ type: "SET_MESSAGE", message: "❌ Please select at least one animal expertise" });
       return;
@@ -98,7 +112,14 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
     dispatch({ type: "SET_LOADING", isLoading: true });
 
     try {
-      await axios.post("/api/Auth/signup", { username, email, password, role, tenantId, animalExpertise });
+      await axios.post("/api/Auth/signup", {
+        username,
+        email,
+        password,
+        role,
+        tenantId: tenantId.toLowerCase(),
+        animalExpertise,
+      });
       dispatch({ type: "SET_MESSAGE", message: "✅ Signup successful! Please login." });
       if (onSuccess) onSuccess();
     } catch (error) {
@@ -182,10 +203,16 @@ export default function SignupForm({ onSuccess }: SignupFormProps) {
       {/* Tenant field (optional) */}
       <input
         type="text"
-        placeholder="Tenant ID (leave empty to create new)"
+        placeholder="Tenant ID (required, alphanumeric)"
         className="w-full mb-6 p-3 rounded-lg bg-amber-50 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500"
         value={tenantId}
-        onChange={(e) => dispatch({ type: "SET_FIELD", field: "tenantId", value: e.target.value })}
+        onChange={(e) =>
+          dispatch({
+            type: "SET_FIELD",
+            field: "tenantId",
+            value: e.target.value.toLowerCase(),
+          })
+        }
       />
 
       <Button

@@ -8,11 +8,13 @@ export interface IAppointment extends Document {
     ownerName: string;
     ownerEmail: string;
     ownerPhone: string;
+    ownerId?: mongoose.Types.ObjectId;
+    tenantId?: string;
     veterinarian?: mongoose.Types.ObjectId;
     scheduledFor: Date;
     reason: string;
     urgency: "Low" | "Medium" | "High" | "Emergency";
-    status: "scheduled" | "confirmed" | "completed" | "cancelled" | "rescheduled";
+    status: "pending" | "scheduled" | "confirmed" | "completed" | "cancelled" | "rescheduled";
     notes?: string;
     createdAt: Date;
     updatedAt: Date;
@@ -54,6 +56,15 @@ const AppointmentSchema = new Schema<IAppointment>(
             required: [true, "Owner phone is required"],
             trim: true,
         },
+        ownerId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            index: true,
+        },
+        tenantId: {
+            type: String,
+            index: true,
+        },
         veterinarian: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "VetProfile",
@@ -74,8 +85,8 @@ const AppointmentSchema = new Schema<IAppointment>(
         },
         status: {
             type: String,
-            enum: ["scheduled", "confirmed", "completed", "cancelled", "rescheduled"],
-            default: "scheduled",
+            enum: ["pending", "scheduled", "confirmed", "completed", "cancelled", "rescheduled"],
+            default: "pending",
         },
         notes: {
             type: String,

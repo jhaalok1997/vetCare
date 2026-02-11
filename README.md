@@ -10,7 +10,7 @@ Vet-Assistant is a comprehensive veterinary practice management and pet care app
 =======
 ## 🚀 Tech Stack
 
-- **Framework:** [Next.js 15](https://nextjs.org/) (App Router)
+- **Framework:** [Next.js 16](https://nextjs.org/) (App Router)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
 - **Styling:** [Tailwind CSS v4](https://tailwindcss.com/), [Framer Motion](https://www.framer.com/motion/), [Lucide React](https://lucide.dev/)
 - **Database:** [MongoDB](https://www.mongodb.com/) (via Mongoose)
@@ -35,7 +35,7 @@ A robust scheduling system built on MongoDB:
 - **Concurrency:** Optimistic locking prevents double-booking slots.
 
 ### 🔐 Security & Access Control
-- **Edge Middleware:** `middleware.ts` intercepts requests to validate JWTs using `jose` (Edge-compatible).
+- **Edge Middleware:** `proxy.ts` intercepts requests to validate JWTs using `jose` (Edge-compatible).
 - **RBAC:**
   - `/admin/*`: Restricted to users with `role: 'admin'`.
   - `/veterinarian/*`: Restricted to users with `role: 'vet'`.
@@ -50,7 +50,7 @@ A robust scheduling system built on MongoDB:
 ## ✨ Key Features
 
 ### 🐾 Pet Owner Features
-- **Appointment Booking:** Schedule visits with available veterinarians.
+- **Appointment Booking:** Schedule visits with available verified veterinarians.
 - **Ask Vet Assist:** AI-powered chatbot for preliminary pet health queries.
 - **Medical Reports:** View and download pet medical history (PDF support).
 - **Service Discovery:** Browse available veterinary services.
@@ -64,6 +64,13 @@ A robust scheduling system built on MongoDB:
 - **User & Vet Management:** Oversee all platform users.
 - **System Monitoring:** View logs and system health.
 - **Content Management:** Manage FAQs and service listings.
+
+## New Feature Highlights
+- **AI-Powered Clinical Insights:** Decision-support that analyzes case histories, lab reports, and zoonotic patterns to surface actionable veterinary recommendations.
+- **Veterinary Knowledge Graph:** Ontology-driven links across pathology, pharmacology, and preventive care for faster cross-referencing and learning.
+- **Predictive Animal Health Analytics:** Models that forecast disease outbreaks, vaccination needs, and livestock productivity trends for data-driven care.
+- **Smart Learning Companion:** Curriculum-aligned quizzes, flashcards, and clinical simulations to support veterinary students and interns.
+- **Pet Owner Guidance Suite:** Early symptom checks, preventive care tips, and nutrition guidance tailored for everyday pet owners.
 
 ## 📂 Project Structure
 

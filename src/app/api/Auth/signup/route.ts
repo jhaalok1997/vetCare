@@ -15,6 +15,21 @@ export async function POST(req: Request) {
       );
     }
 
+    if (!tenantId) {
+      return NextResponse.json(
+        { error: "Tenant ID is required" },
+        { status: 400 }
+      );
+    }
+
+    const tenantIdPattern = /^[a-zA-Z0-9]{3,32}$/;
+    if (!tenantIdPattern.test(String(tenantId))) {
+      return NextResponse.json(
+        { error: "Tenant ID must be 3–32 characters and alphanumeric only" },
+        { status: 400 }
+      );
+    }
+
     await connectDB();
 
     // Check duplicates
@@ -34,7 +49,7 @@ export async function POST(req: Request) {
       email,
       password: hashedPassword,
       role: role || "petOwner", // default role
-      tenantId: tenantId || email, // fallback tenantId → could be clinic/org id later
+      tenantId: String(tenantId).toLowerCase().trim(),
     });
 
     // If user is a vet, create a VetProfile

@@ -6,10 +6,10 @@ import axios from "axios";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tab";
 import { Button } from "@/components/ui/button";
 import { DashboardData } from "./types";
-import { DashboardOverviewSection } from "./DashboardOverview";
-import { DashboardAppointmentsSection } from "./DashboardAppointments";
-import { DashboardPatientsSection } from "./DashboardPatients";
-import { DashboardMessagesSection } from "./DashboardMessages";
+import { DashboardOverviewSection } from "./Overview/DashboardOverview";
+import { DashboardAppointmentsSection } from "./Appointments/DashboardAppointments";
+import { DashboardPatientsSection } from "./Patients/DashboardPatients";
+import { DashboardMessagesSection } from "./Messages/DashboardMessages";
 
 const numberFormatter = new Intl.NumberFormat();
 
@@ -49,6 +49,22 @@ export default function VetDashboard() {
         }
     }, []);
 
+    const handleConfirmAppointment = useCallback(
+        async (appointmentId: string) => {
+            try {
+                await axios.patch("/api/veterinarian/dashboard/appointments", {
+                    appointmentId,
+                    status: "confirmed",
+                });
+                await fetchDashboardData();
+            } catch (err) {
+                console.error("Failed to confirm appointment:", err);
+                setError("Unable to confirm appointment. Please try again.");
+            }
+        },
+        [fetchDashboardData]
+    );
+
     useEffect(() => {
         const checkAuth = async () => {
             try {
@@ -83,6 +99,10 @@ export default function VetDashboard() {
     );
 
     const isVerified = dashboardData?.meta?.vetProfile?.isVerified ?? false;
+    const pendingCount = useMemo(
+        () => (dashboardData?.appointments || []).filter((appointment) => appointment.status === "pending").length,
+        [dashboardData]
+    );
 
     if (authLoading || (dataLoading && !dashboardData)) {
         return (
@@ -130,7 +150,16 @@ export default function VetDashboard() {
             <Tabs defaultValue="overview" className="w-full">
                 <TabsList className="mb-4 flex flex-wrap">
                     <TabsTrigger className="hover:bg-gray-500 cursor-pointer" value="overview">Overview</TabsTrigger>
-                    <TabsTrigger className="hover:bg-gray-500 cursor-pointer" value="appointments">Appointments</TabsTrigger>
+                    <TabsTrigger className="hover:bg-gray-500 cursor-pointer" value="appointments">
+                        <span className="flex items-center gap-2">
+                            Appointments
+                            {isVerified && pendingCount > 0 && (
+                                <span className="inline-flex min-w-6 items-center justify-center rounded-full bg-amber-500 px-2 py-0.5 text-xs font-semibold text-white">
+                                    {pendingCount}
+                                </span>
+                            )}
+                        </span>
+                    </TabsTrigger>
                     <TabsTrigger className="hover:bg-gray-500 cursor-pointer" value="patients">Patients</TabsTrigger>
                     <TabsTrigger className="hover:bg-gray-500 cursor-pointer" value="messages">Messages</TabsTrigger>
                 </TabsList>
@@ -143,6 +172,8 @@ export default function VetDashboard() {
                     <DashboardAppointmentsSection
                         appointments={dashboardData?.appointments}
                         isLoading={dataLoading}
+                        isVerified={isVerified}
+                        onConfirm={handleConfirmAppointment}
                     />
                 </TabsContent>
 

@@ -2,6 +2,7 @@ import FAQ from "@/components/Faqs/faqs";
 import QuickActions from "@/components/Home/QuickActions";
 import MiniChart from "@/components/Home/MiniChart";
 import MiniCalendar from "@/components/Home/MiniCalendar";
+import UpcomingAppointments from "@/components/Home/UpcomingAppointments";
 import Image from "next/image";
 
 export default function Home() {
@@ -82,6 +83,7 @@ export default function Home() {
             <MiniCalendar />
           </div>
         </div>
+        <UpcomingAppointments />
       </div>
 
       {/* FAQs */}

@@ -1,7 +1,8 @@
 "use client"
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
+import axios from "axios"
 
 function getMonthMatrix(year: number, monthIndex: number) {
     const firstDay = new Date(year, monthIndex, 1)
@@ -33,13 +34,48 @@ function getMonthMatrix(year: number, monthIndex: number) {
     return cells
 }
 
+function toLocalDateKey(date: Date) {
+    const year = date.getFullYear()
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const day = String(date.getDate()).padStart(2, "0")
+    return `${year}-${month}-${day}`
+}
+
 export default function MiniCalendar() {
     const today = new Date()
     const [view, setView] = useState({ year: today.getFullYear(), month: today.getMonth() })
+    const [appointmentDates, setAppointmentDates] = useState<Set<string>>(new Set())
 
     const cells = useMemo(() => getMonthMatrix(view.year, view.month), [view])
 
     const monthName = new Date(view.year, view.month, 1).toLocaleString("en-US", { month: "long" })
+
+    useEffect(() => {
+        const fetchAppointments = async () => {
+            try {
+                const res = await axios.get("/api/veterinarian/dashboard/appointments", {
+                    params: { mine: "true", status: "pending,confirmed" },
+                })
+                const items = Array.isArray(res.data?.data) ? res.data.data : []
+                const nextDates = new Set<string>()
+                items.forEach((appointment: { scheduledFor?: string | Date }) => {
+                    if (!appointment?.scheduledFor) return
+                    const date = new Date(appointment.scheduledFor)
+                    if (Number.isNaN(date.getTime())) return
+                    nextDates.add(toLocalDateKey(date))
+                })
+                setAppointmentDates(nextDates)
+            } catch (err) {
+                console.error("Failed to load appointments calendar data:", err)
+            }
+        }
+
+        fetchAppointments()
+
+        const handler = () => fetchAppointments()
+        window.addEventListener("appointments:updated", handler)
+        return () => window.removeEventListener("appointments:updated", handler)
+    }, [])
 
     function prevMonth() {
         setView((v) => {
@@ -79,13 +115,16 @@ export default function MiniCalendar() {
                     <div className="grid grid-cols-7 gap-2">
                         {cells.map(({ date, inCurrentMonth }) => {
                             const isToday = date.toDateString() === today.toDateString()
+                            const dateKey = toLocalDateKey(date)
+                            const hasAppointment = appointmentDates.has(dateKey)
                             return (
                                 <div
                                     key={date.toISOString()}
                                     className={
                                         "rounded-md p-2 text-sm border text-center " +
                                         (inCurrentMonth ? "bg-white " : "bg-gray-50 text-gray-400 ") +
-                                        (isToday ? "border-emerald-500" : "border-gray-200")
+                                        (isToday ? "border-emerald-500 " : "border-gray-200 ") +
+                                        (hasAppointment ? "bg-gray-900 text-white border-gray-900 font-semibold " : "")
                                     }
                                 >
                                     {date.getDate()}

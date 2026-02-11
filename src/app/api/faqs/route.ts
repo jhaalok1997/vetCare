@@ -71,9 +71,9 @@ let lastGenerated = 0;
 export async function GET() {
   try {
     const now = Date.now();
-    const oneHour = 60 * 60 * 1000;
+    const oneDay = 24 * 60 * 60 * 1000;
 
-    if (!cachedFAQs.length || now - lastGenerated > oneHour) {
+    if (!cachedFAQs.length || now - lastGenerated > oneDay) {
       cachedFAQs = await generateFAQs();
       lastGenerated = now;
     }

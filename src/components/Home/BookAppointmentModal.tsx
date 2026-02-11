@@ -53,22 +53,31 @@ export default function BookAppointmentModal({ isOpen, onClose }: BookAppointmen
 
     const onSubmit = async (data: BookAppointmentFormData) => {
         try {
-            const response = await axios.post("/api/appointments", data, {
+            const response = await axios.post("/api/veterinarian/dashboard/appointments", data, {
                 headers: {
                     "Content-Type": "application/json",
                 },
             })
 
             if (response.data.success) {
+                if (typeof window !== "undefined") {
+                    window.alert("Appointment booked successfully. Waiting for vet confirmation.")
+                }
                 setTimeout(() => {
                     reset()
                     onClose()
+                    if (typeof window !== "undefined") {
+                        window.dispatchEvent(new CustomEvent("appointments:updated"))
+                    }
                 }, 2000)
             } else {
                 setError("root", {
                     type: "manual",
                     message: response.data.error || "Failed to book appointment",
                 })
+                if (typeof window !== "undefined") {
+                    window.alert(response.data.error || "Failed to book appointment")
+                }
             }
         } catch (err) {
             const error = err as AxiosError<{ error?: string }>
@@ -76,6 +85,9 @@ export default function BookAppointmentModal({ isOpen, onClose }: BookAppointmen
                 type: "manual",
                 message: error.response?.data?.error || "An error occurred. Please try again.",
             })
+            if (typeof window !== "undefined") {
+                window.alert(error.response?.data?.error || "An error occurred. Please try again.")
+            }
             console.error(err)
         }
     }
@@ -106,7 +118,7 @@ export default function BookAppointmentModal({ isOpen, onClose }: BookAppointmen
                 {/* Success Message */}
                 {isSubmitSuccessful && (
                     <div className="mx-6 mt-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-                        <p className="text-green-800 font-semibold">✓ Appointment booked successfully!</p>
+                        <p className="text-green-800 font-semibold">✓ Appointment booked! Pending vet confirmation.</p>
                     </div>
                 )}
 

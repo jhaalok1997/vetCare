@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { DashboardMessage } from "./types";
+import { DashboardMessage } from "../types";
 
-// Full date time
 const formatDateTime = (value?: string | Date | null) => {
   if (!value) return "N/A";
   const date = new Date(value);
@@ -15,7 +14,6 @@ const formatDateTime = (value?: string | Date | null) => {
   }).format(date);
 };
 
-// Relative time logic
 const getRelativeStatus = (value?: string | Date | null) => {
   if (!value) return "N/A";
   const date = new Date(value);
@@ -32,7 +30,6 @@ const getRelativeStatus = (value?: string | Date | null) => {
   return `${Math.round(diffDays)} day${Math.round(diffDays) > 1 ? "s" : ""} ago`;
 };
 
-// is NEW? (last 24 hours)
 const isNewMessage = (value?: string | Date | null) => {
   if (!value) return false;
   const date = new Date(value);
@@ -51,12 +48,10 @@ export function DashboardMessagesSection({
   isLoading,
   onRefresh,
 }: DashboardMessagesProps) {
-
-  // Sort: latest on top
   const safeDate = (value?: string | Date | null) => {
-  if (!value) return new Date(0); // Oldest date → will be at bottom
-  return new Date(value);
-   };
+    if (!value) return new Date(0);
+    return new Date(value);
+  };
 
   const sortedMessages = [...(messages || [])].sort(
     (a, b) =>
@@ -81,7 +76,6 @@ export function DashboardMessagesSection({
               key={message.id}
               className="rounded-lg border p-4 space-y-3 hover:bg-muted/30 transition"
             >
-              {/* TOP SECTION */}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <p className="font-semibold">{message.name ?? "Unknown sender"}</p>
@@ -98,17 +92,13 @@ export function DashboardMessagesSection({
                 </div>
               </div>
 
-              {/* MESSAGE */}
               <p className="text-sm text-muted-foreground border-l-4 pl-2">{message.message}</p>
 
-              {/* BADGES */}
               <div className="flex gap-2 items-center">
-                {/* NEW badge */}
                 {isNewMessage(message.receivedAt) && (
                   <Badge className="bg-green-600 hover:bg-green-700">NEW</Badge>
                 )}
 
-                {/* STATUS badge */}
                 <Badge variant="outline" className="text-xs">
                   {message.status ?? "new"}
                 </Badge>
