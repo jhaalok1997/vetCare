@@ -1,4 +1,4 @@
-# Vet-Assistant (Vet🐾Care)
+# Vet🐾Care (Your Own Vet-Assistant )
 
 Vet-Assistant is a comprehensive veterinary practice management and pet care application designed to bridge the gap between pet owners and veterinarians. It features appointment booking, medical record management, AI-powered assistance, and role-based dashboards for Admins, Veterinarians, and Pet Owners.
 
@@ -21,7 +21,7 @@ Vet-Assistant is a comprehensive veterinary practice management and pet care app
 
 ## 🏗️ Architecture & Design
 
-### 🤖 AI-Powered Assistance (RAG & LLM)
+### 🤖 AI-Powered Assistance (LLM & Tool calling)
 The "Ask Vet Assist" feature leverages a sophisticated RAG (Retrieval-Augmented Generation) pipeline:
 - **Context Awareness:** Chat history is cached in **Redis** (TTL 7 days) to maintain conversation context.
 - **External Knowledge:** Uses **Tavily API** to fetch real-time veterinary research and news for queries about recent events (2024+).
